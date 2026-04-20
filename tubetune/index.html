@@ -17,9 +17,6 @@
         }
     </script>
     <style>
-        /* ═══════════════════════════════════════
-           CSS Variables
-        ═══════════════════════════════════════ */
         :root {
             --bg-base: #0b0d10;
             --bg-surface: #121518;
@@ -36,21 +33,13 @@
             --danger: #e74c3c;
             --warning: #f0a500;
         }
-
-        /* ═══════════════════════════════════════
-           Reset & Base
-        ═══════════════════════════════════════ */
         * { box-sizing: border-box; }
         body { margin: 0; background: var(--bg-base); color: var(--text-primary); }
-
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-        /* ═══════════════════════════════════════
-           Utility Classes — pengganti inline style
-        ═══════════════════════════════════════ */
         .v-text { color: var(--text-primary); }
         .v-text2 { color: var(--text-secondary); }
         .v-muted { color: var(--text-muted); }
@@ -64,161 +53,56 @@
         .v-hover { background: var(--bg-hover); }
         .v-accent-dim { background: var(--accent-dim); }
         .v-border { border-color: var(--border); }
-        .v-btn {
-            background: var(--accent);
-            color: var(--bg-base);
-            transition: background 0.2s;
-        }
+        .v-btn { background: var(--accent); color: var(--bg-base); transition: background 0.2s; }
         .v-btn:hover { background: var(--accent-hover); }
-        .v-err {
-            background: rgba(231, 76, 60, 0.12);
-            color: var(--danger);
-        }
-        .v-err-border {
-            background: var(--bg-base);
-            border: 1px solid var(--border);
-        }
+        .v-err { background: rgba(231, 76, 60, 0.12); color: var(--danger); }
+        .v-err-border { background: var(--bg-base); border: 1px solid var(--border); }
         .v-border-t { border-top: 1px solid var(--border); }
         .divider-themed { border-color: var(--border); }
-        .header-gradient {
-            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
-        }
-        .player-bar-base {
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border);
-            min-height: 88px;
-        }
+        .header-gradient { background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%); }
+        .player-bar-base { background: var(--bg-surface); border-top: 1px solid var(--border); min-height: 88px; }
         .logo-icon { color: var(--bg-base); }
-        .pl-delete { padding: 4px; }
+        .pl-delete { padding: 4px; opacity: 0; transition: opacity 0.2s; }
+        .nav-item:hover .pl-delete { opacity: 1; }
         .pl-move-item { transition: background 0.15s; }
         .pl-move-item:hover { background: var(--bg-hover); }
-        .pl-checkbox {
-            accent-color: var(--accent);
-            width: 1rem;
-            height: 1rem;
-        }
+        .pl-checkbox { accent-color: var(--accent); width: 1rem; height: 1rem; }
 
-        /* ═══════════════════════════════════════
-           Button Loading State
-        ═══════════════════════════════════════ */
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-            opacity: 0.7;
-        }
+        .btn-loading { position: relative; pointer-events: none; opacity: 0.7; }
         .btn-loading::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            margin-left: 8px;
-            vertical-align: middle;
+            content: ''; display: inline-block; width: 14px; height: 14px;
+            border: 2px solid transparent; border-top-color: currentColor;
+            border-radius: 50%; animation: spin 0.6s linear infinite;
+            margin-left: 8px; vertical-align: middle;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ═══════════════════════════════════════
-           Background Blobs
-        ═══════════════════════════════════════ */
-        .bg-blob {
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(140px);
-            opacity: 0.08;
-        }
-        .bg-blob-1 {
-            width: 600px; height: 600px;
-            top: -150px; left: -100px;
-            background: var(--accent);
-            animation: blobFloat 25s ease-in-out infinite;
-        }
-        .bg-blob-2 {
-            width: 500px; height: 500px;
-            bottom: -100px; right: -80px;
-            background: #e74c3c;
-            animation: blobFloat 30s ease-in-out infinite reverse;
-        }
+        .bg-blob { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(140px); opacity: 0.08; }
+        .bg-blob-1 { width: 600px; height: 600px; top: -150px; left: -100px; background: var(--accent); animation: blobFloat 25s ease-in-out infinite; }
+        .bg-blob-2 { width: 500px; height: 500px; bottom: -100px; right: -80px; background: #e74c3c; animation: blobFloat 30s ease-in-out infinite reverse; }
         @keyframes blobFloat {
             0%, 100% { transform: translate(0, 0) scale(1); }
             33% { transform: translate(40px, -30px) scale(1.05); }
             66% { transform: translate(-20px, 20px) scale(0.95); }
         }
 
-        /* ═══════════════════════════════════════
-           Sidebar
-        ═══════════════════════════════════════ */
-        #sidebar {
-            background: var(--bg-surface);
-            border-right: 1px solid var(--border);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 40;
-        }
+        #sidebar { background: var(--bg-surface); border-right: 1px solid var(--border); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 40; }
         @media (max-width: 767px) {
-            #sidebar {
-                position: fixed;
-                top: 0; left: 0; bottom: 0;
-                transform: translateX(-100%);
-            }
+            #sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
             #sidebar.open { transform: translateX(0); }
         }
-        #sidebar-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 35;
-            display: none;
-        }
+        #sidebar-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 35; display: none; }
         #sidebar-overlay.show { display: block; }
 
-        /* ═══════════════════════════════════════
-           Navigation
-        ═══════════════════════════════════════ */
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 10px 20px;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-        }
+        .nav-item { display: flex; align-items: center; gap: 14px; padding: 10px 20px; border-radius: 8px; color: var(--text-secondary); transition: all 0.2s; cursor: pointer; font-weight: 500; font-size: 14px; }
         .nav-item:hover { color: var(--text-primary); background: var(--bg-hover); }
         .nav-item.active { color: var(--accent); background: var(--accent-dim); }
         .nav-item i { width: 22px; text-align: center; font-size: 16px; }
-        .pl-delete {
-            opacity: 0;
-            transition: opacity 0.2s;
-            padding: 4px;
-        }
-        .nav-item:hover .pl-delete { opacity: 1; }
 
-        /* ═══════════════════════════════════════
-           Track List
-        ═══════════════════════════════════════ */
-        .track-row {
-            display: grid;
-            grid-template-columns: 40px 48px 1fr 100px 60px 40px;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
+        .track-row { display: grid; grid-template-columns: 40px 48px 1fr 100px 60px 40px; align-items: center; gap: 12px; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
         @media (max-width: 640px) {
             .track-row { grid-template-columns: 32px 40px 1fr 40px; }
-            .track-row .track-artist-col,
-            .track-row .track-duration-col { display: none; }
+            .track-row .track-artist-col, .track-row .track-duration-col { display: none; }
         }
         .track-row:hover { background: var(--bg-hover); }
         .track-row.active { background: var(--accent-dim); }
@@ -227,7 +111,6 @@
         .track-row:hover .track-play-icon { display: flex !important; }
         .track-row.active .track-num { display: none; }
         .track-row.active .track-eq { display: flex !important; }
-
         .track-header { color: var(--text-muted); cursor: default; }
         .track-num { color: var(--text-muted); }
         .track-play-icon { color: var(--text-primary); display: none; }
@@ -235,267 +118,73 @@
         .track-duration-col { color: var(--text-muted); }
         .track-sub { color: var(--text-secondary); }
 
-        /* ═══════════════════════════════════════
-           Equalizer Bars
-        ═══════════════════════════════════════ */
         .track-eq { display: none; }
-        .eq-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 2px;
-            height: 16px;
-        }
-        .eq-bar {
-            width: 3px;
-            border-radius: 1.5px;
-            background: var(--accent);
-            animation: eqBounce 0.6s ease-in-out infinite;
-        }
+        .eq-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
+        .eq-bar { width: 3px; border-radius: 1.5px; background: var(--accent); animation: eqBounce 0.6s ease-in-out infinite; }
         .eq-bar:nth-child(1) { height: 60%; animation-delay: 0s; }
         .eq-bar:nth-child(2) { height: 100%; animation-delay: 0.15s; }
         .eq-bar:nth-child(3) { height: 40%; animation-delay: 0.3s; }
         .eq-paused .eq-bar { animation-play-state: paused; }
-        @keyframes eqBounce {
-            0%, 100% { transform: scaleY(0.3); }
-            50% { transform: scaleY(1); }
-        }
+        @keyframes eqBounce { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
 
-        /* ═══════════════════════════════════════
-           Progress & Volume Bars
-        ═══════════════════════════════════════ */
-        .progress-container {
-            position: relative;
-            height: 4px;
-            background: var(--bg-hover);
-            border-radius: 2px;
-            cursor: pointer;
-            transition: height 0.15s;
-            flex: 1;
-        }
+        .progress-container { position: relative; height: 4px; background: var(--bg-hover); border-radius: 2px; cursor: pointer; transition: height 0.15s; flex: 1; }
         .progress-container:hover { height: 6px; }
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 2px;
-            position: relative;
-            transition: none;
-        }
-        .progress-container:hover .progress-fill::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-        .volume-container {
-            position: relative;
-            height: 4px;
-            background: var(--bg-hover);
-            border-radius: 2px;
-            cursor: pointer;
-            width: 100px;
-            transition: height 0.15s;
-        }
+        .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; position: relative; transition: none; }
+        .progress-container:hover .progress-fill::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+        .volume-container { position: relative; height: 4px; background: var(--bg-hover); border-radius: 2px; cursor: pointer; width: 100px; transition: height 0.15s; }
         .volume-container:hover { height: 6px; }
-        .volume-fill {
-            height: 100%;
-            background: var(--text-primary);
-            border-radius: 2px;
-            position: relative;
-        }
+        .volume-fill { height: 100%; background: var(--text-primary); border-radius: 2px; }
 
-        /* ═══════════════════════════════════════
-           Player Bar
-        ═══════════════════════════════════════ */
-        #player-bar::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent), #00b4d8, var(--accent));
-            background-size: 200% 100%;
-            opacity: 0;
-            transition: opacity 0.4s;
-            animation: shimmer 3s ease-in-out infinite;
-        }
+        #player-bar::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), #00b4d8, var(--accent)); background-size: 200% 100%; opacity: 0; transition: opacity 0.4s; animation: shimmer 3s ease-in-out infinite; }
         #player-bar.playing::before { opacity: 1; }
-        @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+        @keyframes shimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
-        /* ═══════════════════════════════════════
-           Control Buttons
-        ═══════════════════════════════════════ */
-        .ctrl-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            padding: 8px;
-            position: relative;
-        }
+        .ctrl-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 8px; position: relative; }
         .ctrl-btn:hover { color: var(--text-primary); transform: scale(1.1); }
         .ctrl-btn:active { transform: scale(0.95); }
         .ctrl-btn.active { color: var(--accent); }
         .ctrl-btn-lg { width: 40px; height: 40px; font-size: 16px; }
-        .ctrl-btn-play {
-            width: 44px; height: 44px;
-            background: var(--accent) !important;
-            color: var(--bg-base) !important;
-            border-radius: 50%;
-            font-size: 18px;
-        }
-        .ctrl-btn-play:hover {
-            background: var(--accent-hover) !important;
-            transform: scale(1.08);
-        }
+        .ctrl-btn-play { width: 44px; height: 44px; background: var(--accent) !important; color: var(--bg-base) !important; border-radius: 50%; font-size: 18px; }
+        .ctrl-btn-play:hover { background: var(--accent-hover) !important; transform: scale(1.08); }
 
-        /* ═══════════════════════════════════════
-           Form Inputs
-        ═══════════════════════════════════════ */
-        .input-field {
-            width: 100%;
-            background: var(--bg-base);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px 16px;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+        .input-field { width: 100%; background: var(--bg-base); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text-primary); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
         .input-field:focus { border-color: var(--accent); }
         .input-field::placeholder { color: var(--text-muted); }
+        .track-thumb { width: 48px; height: 36px; border-radius: 4px; object-fit: cover; background: var(--bg-hover); }
+        .player-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--bg-hover); flex-shrink: 0; }
+        .preview-thumb { width: 80px; height: 56px; border-radius: 8px; object-fit: cover; }
 
-        /* ═══════════════════════════════════════
-           Thumbnails
-        ═══════════════════════════════════════ */
-        .track-thumb {
-            width: 48px; height: 36px;
-            border-radius: 4px;
-            object-fit: cover;
-            background: var(--bg-hover);
-        }
-        .player-thumb {
-            width: 56px; height: 56px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: var(--bg-hover);
-            flex-shrink: 0;
-        }
-        .preview-thumb {
-            width: 80px; height: 56px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
+        .skeleton { background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%); background-size: 200% 100%; animation: skeletonShimmer 1.5s ease-in-out infinite; border-radius: 6px; }
+        @keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* ═══════════════════════════════════════
-           Skeleton Loading
-        ═══════════════════════════════════════ */
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
-            background-size: 200% 100%;
-            animation: skeletonShimmer 1.5s ease-in-out infinite;
-            border-radius: 6px;
-        }
-        @keyframes skeletonShimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* ═══════════════════════════════════════
-           Modals
-        ═══════════════════════════════════════ */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: 50;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-overlay.show { display: flex; }
-        .modal-box {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 500px;
-            width: 100%;
-            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .modal-box { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-        /* ═══════════════════════════════════════
-           Toasts
-        ═══════════════════════════════════════ */
-        .toast {
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 280px;
-            animation: toastIn 0.3s ease-out;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border);
-        }
+        .toast { padding: 12px 20px; border-radius: 10px; font-size: 14px; display: flex; align-items: center; gap: 10px; min-width: 280px; animation: toastIn 0.3s ease-out; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
         .toast-success { background: var(--bg-elevated); color: var(--accent); }
         .toast-error { background: var(--bg-elevated); color: var(--danger); }
         .toast-info { background: var(--bg-elevated); color: #5dade2; }
         .toast-warning { background: var(--bg-elevated); color: var(--warning); }
         .toast-exit { animation: toastOut 0.3s ease-in forwards; }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(60px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes toastOut {
-            from { opacity: 1; transform: translateX(0); }
-            to { opacity: 0; transform: translateX(60px); }
-        }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(60px); } }
 
-        /* ═══════════════════════════════════════
-           Search Highlight
-        ═══════════════════════════════════════ */
-        mark {
-            background: var(--accent-dim);
-            color: var(--accent);
-            border-radius: 2px;
-            padding: 0 2px;
-        }
+        mark { background: var(--accent-dim); color: var(--accent); border-radius: 2px; padding: 0 2px; }
 
-        /* ═══════════════════════════════════════
-           Reduced Motion
-        ═══════════════════════════════════════ */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
+        /* User info di sidebar */
+        .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 10px; background: var(--bg-hover); margin: 0 12px; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .user-avatar i { color: var(--accent); font-size: 13px; }
+        .btn-logout { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .btn-logout:hover { color: var(--danger); background: rgba(231,76,60,0.1); }
+
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     </style>
 </head>
 
 <body class="font-body overflow-hidden">
-    <!-- Background Blobs -->
     <div class="bg-blob bg-blob-1"></div>
     <div class="bg-blob bg-blob-2"></div>
 
@@ -511,7 +200,19 @@
                     <span class="font-display font-extrabold text-xl tracking-tight">TubeTune</span>
                 </div>
 
-                <nav id="main-nav" class="px-3 mt-2 space-y-1">
+                <!-- User Card -->
+                <div class="user-card" id="user-card">
+                    <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <p id="sidebar-username" class="text-sm font-semibold truncate v-text">—</p>
+                        <p class="text-xs v-muted">Online</p>
+                    </div>
+                    <button class="btn-logout" data-action="logout" title="Keluar">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <nav id="main-nav" class="px-3 mt-4 space-y-1">
                     <div class="nav-item active" data-action="switch-pl" data-playlist-id="all">
                         <i class="fa-solid fa-house"></i> Semua Lagu
                     </div>
@@ -522,7 +223,7 @@
                 <div class="px-3 flex-1 overflow-y-auto">
                     <div class="flex items-center justify-between px-3 mb-2">
                         <span class="text-xs font-semibold uppercase tracking-wider v-muted">Playlist</span>
-                        <button class="ctrl-btn text-xs pl-delete" data-action="open-modal" data-modal="modal-create-pl">
+                        <button class="ctrl-btn text-xs" data-action="open-modal" data-modal="modal-create-pl" style="opacity:1;">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -554,28 +255,20 @@
                 </header>
 
                 <div id="error-container" class="px-6"></div>
-
                 <div class="px-6 pt-2 pb-1">
                     <div class="flex items-center justify-between mb-2">
                         <p id="track-count" class="text-sm v-text2"></p>
-                        <button data-action="load-tracks" class="ctrl-btn text-sm">
-                            <i class="fa-solid fa-rotate"></i>
-                        </button>
+                        <button data-action="load-tracks" class="ctrl-btn text-sm"><i class="fa-solid fa-rotate"></i></button>
                     </div>
                 </div>
-
                 <div class="px-6">
                     <div class="track-row text-xs font-semibold uppercase tracking-wider mb-1 track-header">
-                        <span class="text-center">#</span>
-                        <span></span>
-                        <span>Judul</span>
+                        <span class="text-center">#</span><span></span><span>Judul</span>
                         <span class="track-artist-col">Artis</span>
-                        <span class="track-duration-col text-right"><i class="fa-regular fa-clock"></i></span>
-                        <span></span>
+                        <span class="track-duration-col text-right"><i class="fa-regular fa-clock"></i></span><span></span>
                     </div>
                     <div class="border-t v-border-t mb-2"></div>
                 </div>
-
                 <div id="track-list" class="px-6 pb-8"></div>
             </main>
         </div>
@@ -586,35 +279,21 @@
                 <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
             </div>
             <div class="flex items-center h-full px-4 pt-2 pb-1 gap-4" style="min-height: 88px;">
-                <!-- Track Info -->
                 <div class="flex items-center gap-3 w-1/4 min-w-0">
                     <img id="player-thumb" class="player-thumb"
-                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324282f' width='56' height='56' rx='8'/%3E%3C/svg%3E"
-                        alt="Sedang diputar">
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324282f' width='56' height='56' rx='8'/%3E%3C/svg%3E" alt="Sedang diputar">
                     <div class="min-w-0">
                         <p id="player-title" class="text-sm font-semibold truncate">Tidak ada lagu</p>
                         <p id="player-artist" class="text-xs truncate v-text2">—</p>
                     </div>
                 </div>
-
-                <!-- Controls -->
                 <div class="flex-1 flex flex-col items-center gap-1 max-w-xl mx-auto">
                     <div class="flex items-center gap-2">
-                        <button id="btn-shuffle" class="ctrl-btn ctrl-btn-lg" data-action="toggle-shuffle">
-                            <i class="fa-solid fa-shuffle text-sm"></i>
-                        </button>
-                        <button class="ctrl-btn ctrl-btn-lg" data-action="prev">
-                            <i class="fa-solid fa-backward-step text-lg"></i>
-                        </button>
-                        <button id="btn-play" class="ctrl-btn ctrl-btn-play" data-action="toggle-play">
-                            <i class="fa-solid fa-play" id="play-icon"></i>
-                        </button>
-                        <button class="ctrl-btn ctrl-btn-lg" data-action="next">
-                            <i class="fa-solid fa-forward-step text-lg"></i>
-                        </button>
-                        <button id="btn-repeat" class="ctrl-btn ctrl-btn-lg" data-action="toggle-repeat">
-                            <i class="fa-solid fa-repeat text-sm" id="repeat-icon"></i>
-                        </button>
+                        <button id="btn-shuffle" class="ctrl-btn ctrl-btn-lg" data-action="toggle-shuffle"><i class="fa-solid fa-shuffle text-sm"></i></button>
+                        <button class="ctrl-btn ctrl-btn-lg" data-action="prev"><i class="fa-solid fa-backward-step text-lg"></i></button>
+                        <button id="btn-play" class="ctrl-btn ctrl-btn-play" data-action="toggle-play"><i class="fa-solid fa-play" id="play-icon"></i></button>
+                        <button class="ctrl-btn ctrl-btn-lg" data-action="next"><i class="fa-solid fa-forward-step text-lg"></i></button>
+                        <button id="btn-repeat" class="ctrl-btn ctrl-btn-lg" data-action="toggle-repeat"><i class="fa-solid fa-repeat text-sm" id="repeat-icon"></i></button>
                     </div>
                     <div class="flex items-center gap-3 w-full text-xs v-text2">
                         <span id="time-current" class="w-10 text-right tabular-nums">0:00</span>
@@ -624,1059 +303,409 @@
                         <span id="time-total" class="w-10 tabular-nums">0:00</span>
                     </div>
                 </div>
-
-                <!-- Volume -->
                 <div class="hidden sm:flex items-center gap-3 w-1/4 justify-end">
-                    <button id="btn-volume" class="ctrl-btn" data-action="toggle-mute">
-                        <i class="fa-solid fa-volume-high text-sm" id="volume-icon"></i>
-                    </button>
-                    <div id="volume-bar" class="volume-container">
-                        <div id="volume-fill" class="volume-fill" style="width: 80%;"></div>
-                    </div>
+                    <button id="btn-volume" class="ctrl-btn" data-action="toggle-mute"><i class="fa-solid fa-volume-high text-sm" id="volume-icon"></i></button>
+                    <div id="volume-bar" class="volume-container"><div id="volume-fill" class="volume-fill" style="width: 80%;"></div></div>
                 </div>
             </div>
         </footer>
     </div>
 
-    <!-- ═══════ Modal: Tambah Lagu ═══════ -->
+    <!-- Modal Tambah Lagu -->
     <div id="modal-add-track" class="modal-overlay">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl">Tambah Lagu</h2>
-                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-add-track">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-add-track"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">URL YouTube</label>
-                    <input id="input-url" type="url" placeholder="https://youtube.com/watch?v=..." class="input-field" autocomplete="off">
-                </div>
-                <div id="url-preview" class="hidden rounded-xl overflow-hidden v-err-border">
-                    <div class="flex items-center gap-3 p-3">
-                        <img id="preview-thumb" class="preview-thumb" src="" alt="Pratinjau">
-                        <div class="flex-1 min-w-0">
-                            <p id="preview-status" class="text-xs v-muted">Mengambil info...</p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Judul</label>
-                    <input id="input-title" type="text" placeholder="Judul lagu" class="input-field" autocomplete="off">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Artis</label>
-                    <input id="input-artist" type="text" placeholder="Nama artis" class="input-field" autocomplete="off">
-                </div>
+                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">URL YouTube</label><input id="input-url" type="url" placeholder="https://youtube.com/watch?v=..." class="input-field" autocomplete="off"></div>
+                <div id="url-preview" class="hidden rounded-xl overflow-hidden v-err-border"><div class="flex items-center gap-3 p-3"><img id="preview-thumb" class="preview-thumb" src="" alt="Pratinjau"><div class="flex-1 min-w-0"><p id="preview-status" class="text-xs v-muted">Mengambil info...</p></div></div></div>
+                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Judul</label><input id="input-title" type="text" placeholder="Judul lagu" class="input-field" autocomplete="off"></div>
+                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Artis</label><input id="input-artist" type="text" placeholder="Nama artis" class="input-field" autocomplete="off"></div>
                 <div id="modal-error-add" class="hidden text-sm rounded-lg p-3 v-err"></div>
-                <button id="btn-submit-track" data-action="submit-track"
-                    class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Tambahkan ke Daftar</button>
+                <button id="btn-submit-track" data-action="submit-track" class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Tambahkan ke Daftar</button>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ Modal: Buat Playlist ═══════ -->
+    <!-- Modal Buat Playlist -->
     <div id="modal-create-pl" class="modal-overlay">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl">Buat Playlist Baru</h2>
-                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-create-pl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-create-pl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Nama Playlist</label>
-                    <input id="input-pl-name" type="text" placeholder="Contoh: Sad Vibes" class="input-field" autocomplete="off">
-                </div>
+                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Nama Playlist</label><input id="input-pl-name" type="text" placeholder="Contoh: Sad Vibes" class="input-field" autocomplete="off"></div>
                 <div id="modal-error-pl" class="hidden text-sm rounded-lg p-3 v-err"></div>
-                <button id="btn-create-pl" data-action="create-playlist"
-                    class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Buat Playlist</button>
+                <button id="btn-create-pl" data-action="create-playlist" class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Buat Playlist</button>
             </div>
         </div>
     </div>
 
-    <!-- ═══════ Modal: Pindah Lagu ke Playlist ═══════ -->
+    <!-- Modal Pindah Lagu -->
     <div id="modal-move-track" class="modal-overlay">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl">Masukkan ke Playlist</h2>
-                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-move-track">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-move-track"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="move-track-playlists" class="space-y-2 max-h-60 overflow-y-auto"></div>
-            <div class="mt-6">
-                <button id="btn-save-move" data-action="save-move"
-                    class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn">Simpan Perubahan</button>
-            </div>
+            <div class="mt-6"><button id="btn-save-move" data-action="save-move" class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn">Simpan Perubahan</button></div>
         </div>
     </div>
 
-    <!-- Toasts -->
     <div id="toasts" class="fixed top-4 right-4 z-50 space-y-3" style="pointer-events: none;"></div>
 
-    <!-- YouTube Player Container (tersembunyi) -->
-    <div id="yt-container" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
-        <div id="yt-player"></div>
-    </div>
+    <div id="yt-container" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden;"><div id="yt-player"></div></div>
 
     <script>
         const TT = (function () {
             'use strict';
 
-            /* ═══════════════════════════════════════
-               Konfigurasi
-            ═══════════════════════════════════════ */
             const CONFIG = {
-                APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxHrkde-NGmzTgLP8JejpgBGJXOIH2yV3q0mCu0jDbX8_nLKP81kyInCj83yQpDDpbE/exec',
-                FALLBACK_TO_DEMO: true,
+                APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwBW2cFXVH28-Kcqc__ZSikE3FaG0wTQ1im3rjq1cFr7ABiOFwG-1tX9l72QfPr3Cq1/exec',
+                FALLBACK_TO_DEMO: false,
                 SEARCH_DEBOUNCE_MS: 250,
                 TOAST_DURATION_MS: 4000,
                 VOLUME_STEP: 5,
                 SEEK_STEP: 5
             };
 
-            /* ═══════════════════════════════════════
-               Data Demo
-            ═══════════════════════════════════════ */
-            const DEMO_TRACKS = [
-                { id: '1', videoId: '4xDzrJKXOOY', title: 'On & On', artist: 'Cartoon', duration: 209, playlists: ['chill'] },
-                { id: '2', videoId: 'AOeY-nDp7hI', title: 'Sky High', artist: 'Elektronomia', duration: 237, playlists: ['upbeat'] },
-                { id: '3', videoId: 'J2X5mJ3HDYE', title: 'Mortals', artist: 'Warriyo', duration: 264, playlists: ['upbeat', 'chill'] }
-            ];
-            const DEMO_PLAYLISTS = [
-                { id: 'chill', name: 'Chill' },
-                { id: 'upbeat', name: 'Upbeat' }
-            ];
-
-            /* ═══════════════════════════════════════
-               State Aplikasi
-            ═══════════════════════════════════════ */
             const state = {
-                tracks: [],
-                filteredTracks: [],
-                playlists: [],
-                activePlaylistId: 'all',
-                currentTrackIndex: -1,
-                isPlaying: false,
-                volume: 80,
-                isMuted: false,
-                searchQuery: '',
-                shuffle: false,
-                repeat: 'off',
-                shuffleOrder: [],
-                isLoading: true,
-                movingTrackId: null
+                tracks: [], filteredTracks: [], playlists: [],
+                activePlaylistId: 'all', currentTrackIndex: -1,
+                isPlaying: false, volume: 80, isMuted: false,
+                searchQuery: '', shuffle: false, repeat: 'off',
+                shuffleOrder: [], isLoading: true, movingTrackId: null,
+                username: ''
             };
 
-            let ytPlayer = null;
-            let ytReady = false;
-            let ytReadyResolve = null;
-            const ytReadyPromise = new Promise(resolve => { ytReadyResolve = resolve; });
+            let ytPlayer = null, ytReady = false, ytReadyResolve = null;
+            const ytReadyPromise = new Promise(r => { ytReadyResolve = r; });
             let progressAnimId = null;
 
-            /* ═══════════════════════════════════════
-               Storage Helper
-            ═══════════════════════════════════════ */
             const Storage = {
-                get(k, fallback) {
-                    try {
-                        const v = localStorage.getItem('tt_' + k);
-                        return v !== null ? JSON.parse(v) : fallback;
-                    } catch { return fallback; }
-                },
-                set(k, v) {
-                    try { localStorage.setItem('tt_' + k, JSON.stringify(v)); } catch { /* noop */ }
-                }
+                get(k, f) { try { var v = localStorage.getItem('tt_' + k); return v !== null ? JSON.parse(v) : f; } catch { return f; } },
+                set(k, v) { try { localStorage.setItem('tt_' + k, JSON.stringify(v)); } catch { } },
+                remove(k) { try { localStorage.removeItem('tt_' + k); } catch { } }
             };
 
-            /* ═══════════════════════════════════════
-               Utility Functions
-            ═══════════════════════════════════════ */
             const Utils = {
-                formatTime(s) {
-                    if (!s || !isFinite(s) || s < 0) return '0:00';
-                    return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
-                },
-                debounce(fn, ms) {
-                    let timer;
-                    return function (...args) {
-                        clearTimeout(timer);
-                        timer = setTimeout(() => fn.apply(this, args), ms);
-                    };
-                },
-                extractVideoId(url) {
-                    if (!url) return null;
-                    let m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-                    if (m) return m[1];
-                    m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-                    if (m) return m[1];
-                    m = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
-                    if (m) return m[1];
-                    if (/^[a-zA-Z0-9_-]{11}$/.test(url.trim())) return url.trim();
-                    return null;
-                },
-                shuffleArray(arr) {
-                    const b = [...arr];
-                    for (let i = b.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [b[i], b[j]] = [b[j], b[i]];
-                    }
-                    return b;
-                },
-                highlightText(text, query) {
-                    if (!query) return text;
-                    return text.replace(
-                        new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
-                        '<mark>$1</mark>'
-                    );
-                }
+                formatTime(s) { if (!s || !isFinite(s) || s < 0) return '0:00'; return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); },
+                debounce(fn, ms) { var t; return function () { var a = arguments, self = this; clearTimeout(t); t = setTimeout(function () { fn.apply(self, a); }, ms); }; },
+                extractVideoId(u) { if (!u) return null; var m = u.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if (m) return m[1]; m = u.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if (m) return m[1]; m = u.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/); if (m) return m[1]; if (/^[a-zA-Z0-9_-]{11}$/.test(u.trim())) return u.trim(); return null; },
+                shuffleArray(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = b[i]; b[i] = b[j]; b[j] = tmp; } return b; },
+                highlightText(t, q) { if (!q) return t; return t.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
             };
 
-            /* ═══════════════════════════════════════
-               Loading State Helper
-            ═══════════════════════════════════════ */
-            function setBtnLoading(btnEl, loading) {
-                if (!btnEl) return;
-                if (loading) {
-                    btnEl.dataset.originalText = btnEl.textContent;
-                    btnEl.classList.add('btn-loading');
-                    btnEl.disabled = true;
-                } else {
-                    btnEl.classList.remove('btn-loading');
-                    btnEl.disabled = false;
-                    if (btnEl.dataset.originalText) {
-                        btnEl.textContent = btnEl.dataset.originalText;
-                        delete btnEl.dataset.originalText;
-                    }
-                }
+            function getToken() { return Storage.get('token', null); }
+
+            function setBtnLoading(btn, loading) {
+                if (!btn) return;
+                if (loading) { btn.dataset.originalText = btn.textContent; btn.classList.add('btn-loading'); btn.disabled = true; }
+                else { btn.classList.remove('btn-loading'); btn.disabled = false; if (btn.dataset.originalText) { btn.textContent = btn.dataset.originalText; delete btn.dataset.originalText; } }
             }
 
-            /* ═══════════════════════════════════════
-               Toast Notification
-            ═══════════════════════════════════════ */
-            function toast(msg, type = 'info') {
-                const container = document.getElementById('toasts');
-                const el = document.createElement('div');
-                el.className = `toast toast-${type}`;
-                el.style.pointerEvents = 'auto';
-
-                const icons = {
-                    success: 'fa-circle-check',
-                    error: 'fa-circle-xmark',
-                    warning: 'fa-triangle-exclamation',
-                    info: 'fa-circle-info'
-                };
-
-                el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span class="v-text">${msg}</span>`;
-                container.appendChild(el);
-
-                setTimeout(() => {
-                    el.classList.add('toast-exit');
-                    el.addEventListener('animationend', () => el.remove());
-                }, CONFIG.TOAST_DURATION_MS);
+            function toast(msg, type) {
+                type = type || 'info';
+                var c = document.getElementById('toasts'), el = document.createElement('div');
+                el.className = 'toast toast-' + type; el.style.pointerEvents = 'auto';
+                var ic = { success: 'fa-circle-check', error: 'fa-circle-xmark', warning: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+                el.innerHTML = '<i class="fa-solid ' + (ic[type] || ic.info) + '"></i><span class="v-text">' + msg + '</span>';
+                c.appendChild(el);
+                setTimeout(function () { el.classList.add('toast-exit'); el.addEventListener('animationend', function () { el.remove(); }); }, CONFIG.TOAST_DURATION_MS);
             }
 
-            /* ═══════════════════════════════════════
-               API Layer
-            ═══════════════════════════════════════ */
+            /* ═══ Auth Guard ═══ */
+            function checkAuth() {
+                var token = getToken();
+                if (!token) { window.location.replace('login.html'); return false; }
+                return true;
+            }
+
+            function forceLogout(msg) {
+                Storage.remove('token');
+                Storage.remove('username');
+                if (msg) toast(msg, 'warning');
+                setTimeout(function () { window.location.replace('login.html'); }, 800);
+            }
+
+            /* ═══ API ═══ */
             const Api = {
                 async fetchTracks() {
-                    if (!CONFIG.APPS_SCRIPT_URL) {
-                        if (CONFIG.FALLBACK_TO_DEMO) return { tracks: DEMO_TRACKS, playlists: DEMO_PLAYLISTS };
-                        throw new Error('URL belum dikonfigurasi');
-                    }
+                    var token = getToken();
+                    if (!token) throw new Error('NO_AUTH');
                     try {
-                        const r = await fetch(CONFIG.APPS_SCRIPT_URL);
-                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                        return await r.json();
+                        var r = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getTracks', token: token }) });
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        var data = await r.json();
+                        if (data.error === 'Unauthorized' || data.error === 'Token tidak valid') throw new Error('NO_AUTH');
+                        if (data.error) throw new Error(data.error);
+                        return data;
                     } catch (e) {
-                        if (CONFIG.FALLBACK_TO_DEMO) {
-                            toast('Mode demo aktif (gagal terhubung server)', 'warning');
-                            return { tracks: DEMO_TRACKS, playlists: DEMO_PLAYLISTS };
-                        }
+                        if (e.message === 'NO_AUTH') throw e;
                         throw e;
                     }
                 },
-
                 async post(data) {
-                    if (!CONFIG.APPS_SCRIPT_URL) return { success: true, demo: true };
-                    try {
-                        const r = await fetch(CONFIG.APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            body: JSON.stringify(data)
-                        });
-                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                        return await r.json();
-                    } catch (e) {
-                        throw e;
-                    }
+                    var token = getToken();
+                    if (token) data.token = token;
+                    var r = await fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    var result = await r.json();
+                    if (result.error === 'Unauthorized' || result.error === 'Token tidak valid') { forceLogout('Sesi berakhir, silakan masuk lagi'); throw new Error('NO_AUTH'); }
+                    if (result.error) throw new Error(result.error);
+                    return result;
                 },
-
-                async fetchOEmbed(videoId) {
-                    try {
-                        const r = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-                        return r.ok ? await r.json() : null;
-                    } catch { return null; }
-                }
+                async fetchOEmbed(id) { try { var r = await fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + id + '&format=json'); return r.ok ? await r.json() : null; } catch { return null; } }
             };
 
-            /* ═══════════════════════════════════════
-               YouTube Player Controller
-            ═══════════════════════════════════════ */
+            /* ═══ YouTube Player ═══ */
             const Player = {
                 init() {
-                    const tag = document.createElement('script');
-                    tag.src = 'https://www.youtube.com/iframe_api';
-                    document.head.appendChild(tag);
-
-                    window.onYouTubeIframeAPIReady = () => {
+                    var tag = document.createElement('script'); tag.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(tag);
+                    window.onYouTubeIframeAPIReady = function () {
                         ytPlayer = new YT.Player('yt-player', {
-                            height: '1',
-                            width: '1',
-                            videoId: '',
-                            playerVars: {
-                                autoplay: 0,
-                                controls: 0,
-                                disablekb: 1,
-                                fs: 0,
-                                modestbranding: 1,
-                                rel: 0,
-                                iv_load_policy: 3,
-                                origin: window.location.origin
-                            },
-                            events: {
-                                onReady: Player.onReady,
-                                onStateChange: Player.onStateChange,
-                                onError: Player.onError
-                            }
+                            height: '1', width: '1', videoId: '',
+                            playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, rel: 0, iv_load_policy: 3, origin: window.location.origin },
+                            events: { onReady: Player.onReady, onStateChange: Player.onStateChange, onError: Player.onError }
                         });
                     };
                 },
-
                 onReady() {
-                    ytReady = true;
-                    ytReadyResolve();
-
-                    const savedVol = Storage.get('volume', 80);
-                    const savedMuted = Storage.get('muted', false);
-                    state.volume = savedVol;
-                    state.isMuted = savedMuted;
-                    if (ytPlayer.setVolume) ytPlayer.setVolume(savedMuted ? 0 : savedVol);
+                    ytReady = true; ytReadyResolve();
+                    state.volume = Storage.get('volume', 80); state.isMuted = Storage.get('muted', false);
+                    if (ytPlayer.setVolume) ytPlayer.setVolume(state.isMuted ? 0 : state.volume);
                     UI.updateVolumeUI();
-
-                    // Restore last played track
-                    const lastVideoId = Storage.get('lastVideoId', null);
-                    if (lastVideoId) {
-                        const idx = state.tracks.findIndex(t => t.videoId === lastVideoId);
-                        if (idx >= 0) {
-                            state.currentTrackIndex = idx;
-                            UI.renderPlaylist();
-                            UI.updatePlayerBar();
-                        }
-                    }
+                    var lid = Storage.get('lastVideoId', null);
+                    if (lid) { var i = state.tracks.findIndex(function (t) { return t.videoId === lid; }); if (i >= 0) { state.currentTrackIndex = i; UI.renderPlaylist(); UI.updatePlayerBar(); } }
                 },
-
                 onStateChange(e) {
-                    switch (e.data) {
-                        case YT.PlayerState.PLAYING:
-                            state.isPlaying = true;
-                            UI.updatePlayButton();
-                            UI.startProgressLoop();
-                            document.getElementById('player-bar').classList.add('playing');
-                            UI.renderPlaylist();
-                            break;
-                        case YT.PlayerState.PAUSED:
-                            state.isPlaying = false;
-                            UI.updatePlayButton();
-                            UI.stopProgressLoop();
-                            document.getElementById('player-bar').classList.remove('playing');
-                            UI.renderPlaylist();
-                            break;
-                        case YT.PlayerState.ENDED:
-                            state.isPlaying = false;
-                            UI.updatePlayButton();
-                            UI.stopProgressLoop();
-                            document.getElementById('player-bar').classList.remove('playing');
-                            UI.renderPlaylist();
-                            Player.next();
-                            break;
-                    }
+                    if (e.data === YT.PlayerState.PLAYING) { state.isPlaying = true; UI.updatePlayButton(); UI.startProgressLoop(); document.getElementById('player-bar').classList.add('playing'); UI.renderPlaylist(); }
+                    else if (e.data === YT.PlayerState.PAUSED) { state.isPlaying = false; UI.updatePlayButton(); UI.stopProgressLoop(); document.getElementById('player-bar').classList.remove('playing'); UI.renderPlaylist(); }
+                    else if (e.data === YT.PlayerState.ENDED) { state.isPlaying = false; UI.updatePlayButton(); UI.stopProgressLoop(); document.getElementById('player-bar').classList.remove('playing'); UI.renderPlaylist(); Player.next(); }
                 },
-
-                onError(e) {
-                    let msg = 'Error pemutaran';
-                    if ([100, 150, 153].includes(e.data)) msg = 'Video dilarang di-embed';
-                    else if (e.data === 101) msg = 'Video tidak bisa diputar pihak ke-3';
-                    toast(msg, 'error');
-                    setTimeout(() => Player.next(), 1500);
-                },
-
-                async play(videoId, index) {
-                    if (!ytReady) await ytReadyPromise;
-                    state.currentTrackIndex = index;
-                    ytPlayer.loadVideoById(videoId);
-                    Storage.set('lastVideoId', videoId);
-                    UI.updatePlayerBar();
-                    UI.renderPlaylist();
-                },
-
-                next() {
-                    if (state.tracks.length === 0) return;
-                    let idx;
-                    if (state.repeat === 'one') {
-                        idx = state.currentTrackIndex;
-                    } else if (state.shuffle) {
-                        idx = Player.getShuffleNext();
-                    } else {
-                        idx = state.currentTrackIndex + 1;
-                        if (idx >= state.tracks.length) {
-                            if (state.repeat === 'all') {
-                                idx = 0;
-                            } else {
-                                state.isPlaying = false;
-                                UI.updatePlayButton();
-                                return;
-                            }
-                        }
-                    }
-                    const track = state.tracks[idx];
-                    if (track) Player.play(track.videoId, idx);
-                },
-
-                prev() {
-                    if (!ytReady || state.currentTrackIndex < 0) return;
-                    const currentTime = ytPlayer.getCurrentTime();
-                    if (currentTime > 3) {
-                        ytPlayer.seekTo(0, true);
-                        return;
-                    }
-                    let idx = state.currentTrackIndex - 1;
-                    if (idx < 0) idx = state.repeat === 'all' ? state.tracks.length - 1 : 0;
-                    Player.play(state.tracks[idx].videoId, idx);
-                },
-
-                getShuffleNext() {
-                    if (state.shuffleOrder.length === 0) {
-                        state.shuffleOrder = Utils.shuffleArray(
-                            state.tracks.map((_, i) => i).filter(i => i !== state.currentTrackIndex)
-                        );
-                    }
-                    return state.shuffleOrder.shift();
-                },
-
-                seekTo(fraction) {
-                    if (!ytReady) return;
-                    const duration = ytPlayer.getDuration() || 0;
-                    if (duration > 0) ytPlayer.seekTo(fraction * duration, true);
-                },
-
-                setVolume(vol) {
-                    state.volume = Math.max(0, Math.min(100, vol));
-                    state.isMuted = false;
-                    if (ytReady) ytPlayer.setVolume(state.volume);
-                    Storage.set('volume', state.volume);
-                    Storage.set('muted', false);
-                    UI.updateVolumeUI();
-                }
+                onError(e) { var m = 'Error pemutaran'; if ([100, 150, 153].indexOf(e.data) >= 0) m = 'Video dilarang di-embed'; else if (e.data === 101) m = 'Video tidak bisa diputar pihak ke-3'; toast(m, 'error'); setTimeout(function () { Player.next(); }, 1500); },
+                async play(id, idx) { if (!ytReady) await ytReadyPromise; state.currentTrackIndex = idx; ytPlayer.loadVideoById(id); Storage.set('lastVideoId', id); UI.updatePlayerBar(); UI.renderPlaylist(); },
+                next() { if (!state.tracks.length) return; var idx; if (state.repeat === 'one') idx = state.currentTrackIndex; else if (state.shuffle) idx = Player.getShuffleNext(); else { idx = state.currentTrackIndex + 1; if (idx >= state.tracks.length) { if (state.repeat === 'all') idx = 0; else { state.isPlaying = false; UI.updatePlayButton(); return; } } } var t = state.tracks[idx]; if (t) Player.play(t.videoId, idx); },
+                prev() { if (!ytReady || state.currentTrackIndex < 0) return; if (ytPlayer.getCurrentTime() > 3) { ytPlayer.seekTo(0, true); return; } var idx = state.currentTrackIndex - 1; if (idx < 0) idx = state.repeat === 'all' ? state.tracks.length - 1 : 0; Player.play(state.tracks[idx].videoId, idx); },
+                getShuffleNext() { if (!state.shuffleOrder.length) state.shuffleOrder = Utils.shuffleArray(state.tracks.map(function (_, i) { return i; }).filter(function (i) { return i !== state.currentTrackIndex; })); return state.shuffleOrder.shift(); },
+                seekTo(f) { if (!ytReady) return; var d = ytPlayer.getDuration() || 0; if (d > 0) ytPlayer.seekTo(f * d, true); },
+                setVolume(v) { state.volume = Math.max(0, Math.min(100, v)); state.isMuted = false; if (ytReady) ytPlayer.setVolume(state.volume); Storage.set('volume', state.volume); Storage.set('muted', false); UI.updateVolumeUI(); }
             };
 
-            /* ═══════════════════════════════════════
-               UI Renderer
-            ═══════════════════════════════════════ */
+            /* ═══ UI ═══ */
             const UI = {
-                init() {
-                    UI.bindEvents();
-                    UI.loadTracks();
-                },
-
+                init() { UI.bindEvents(); UI.loadTracks(); },
                 bindEvents() {
-                    // Search input
-                    document.getElementById('search-input').addEventListener('input', Utils.debounce(e => {
-                        state.searchQuery = e.target.value.trim();
-                        UI.applyFilter();
-                    }, CONFIG.SEARCH_DEBOUNCE_MS));
-
-                    // Progress bar dragging (atas player)
-                    UI.setupDraggable('progress-bar', fraction => Player.seekTo(fraction));
-                    // Progress bar inline
-                    UI.setupDraggable('progress-bar-inline', fraction => Player.seekTo(fraction));
-
-                    // Volume bar dragging
-                    UI.setupDraggable('volume-bar', fraction => {
-                        Player.setVolume(Math.round(fraction * 100));
-                    });
-
-                    // URL input preview
-                    document.getElementById('input-url').addEventListener('input', Utils.debounce(async (e) => {
-                        const url = e.target.value.trim();
-                        const videoId = Utils.extractVideoId(url);
-                        const preview = document.getElementById('url-preview');
-                        const statusEl = document.getElementById('preview-status');
-
-                        if (!videoId) {
-                            preview.classList.add('hidden');
-                            return;
-                        }
-
-                        preview.classList.remove('hidden');
-                        document.getElementById('preview-thumb').src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-                        statusEl.textContent = 'Mengambil info...';
-                        statusEl.className = 'text-xs v-muted';
-
-                        const oembed = await Api.fetchOEmbed(videoId);
-                        if (oembed) {
-                            statusEl.textContent = oembed.title;
-                            statusEl.className = 'text-xs v-text';
-                            const titleInput = document.getElementById('input-title');
-                            const artistInput = document.getElementById('input-artist');
-                            if (!titleInput.value) titleInput.value = oembed.title;
-                            if (!artistInput.value && oembed.author_name) artistInput.value = oembed.author_name;
-                        } else {
-                            statusEl.textContent = 'Gagal ambil info';
-                            statusEl.className = 'text-xs v-danger';
-                        }
+                    document.getElementById('search-input').addEventListener('input', Utils.debounce(function (e) { state.searchQuery = e.target.value.trim(); UI.applyFilter(); }, CONFIG.SEARCH_DEBOUNCE_MS));
+                    UI.setupDraggable('progress-bar', function (f) { Player.seekTo(f); });
+                    UI.setupDraggable('progress-bar-inline', function (f) { Player.seekTo(f); });
+                    UI.setupDraggable('volume-bar', function (f) { Player.setVolume(Math.round(f * 100)); });
+                    document.getElementById('input-url').addEventListener('input', Utils.debounce(async function (e) {
+                        var url = e.target.value.trim(), vid = Utils.extractVideoId(url), p = document.getElementById('url-preview'), s = document.getElementById('preview-status');
+                        if (!vid) { p.classList.add('hidden'); return; }
+                        p.classList.remove('hidden'); document.getElementById('preview-thumb').src = 'https://img.youtube.com/vi/' + vid + '/mqdefault.jpg';
+                        s.textContent = 'Mengambil info...'; s.className = 'text-xs v-muted';
+                        var o = await Api.fetchOEmbed(vid);
+                        if (o) { s.textContent = o.title; s.className = 'text-xs v-text'; var ti = document.getElementById('input-title'), ai = document.getElementById('input-artist'); if (!ti.value) ti.value = o.title; if (!ai.value && o.author_name) ai.value = o.author_name; }
+                        else { s.textContent = 'Gagal ambil info'; s.className = 'text-xs v-danger'; }
                     }, 500));
                 },
-
-                /** Setup drag (mouse + touch) pada element progress/volume */
-                setupDraggable(elementId, onFraction) {
-                    const el = document.getElementById(elementId);
-                    if (!el) return;
-                    let dragging = false;
-
-                    function handleEvent(clientX) {
-                        const rect = el.getBoundingClientRect();
-                        const fraction = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                        onFraction(fraction);
-                    }
-
-                    el.addEventListener('mousedown', e => { dragging = true; handleEvent(e.clientX); });
-                    document.addEventListener('mousemove', e => { if (dragging) handleEvent(e.clientX); });
-                    document.addEventListener('mouseup', () => { dragging = false; });
-
-                    el.addEventListener('touchstart', e => { dragging = true; handleEvent(e.touches[0].clientX); }, { passive: true });
-                    document.addEventListener('touchmove', e => { if (dragging) handleEvent(e.touches[0].clientX); }, { passive: true });
-                    document.addEventListener('touchend', () => { dragging = false; });
+                setupDraggable(id, onF) {
+                    var el = document.getElementById(id); if (!el) return; var d = false;
+                    function h(cx) { var r = el.getBoundingClientRect(); onF(Math.max(0, Math.min(1, (cx - r.left) / r.width))); }
+                    el.addEventListener('mousedown', function (e) { d = true; h(e.clientX); });
+                    document.addEventListener('mousemove', function (e) { if (d) h(e.clientX); });
+                    document.addEventListener('mouseup', function () { d = false; });
+                    el.addEventListener('touchstart', function (e) { d = true; h(e.touches[0].clientX); }, { passive: true });
+                    document.addEventListener('touchmove', function (e) { if (d) h(e.touches[0].clientX); }, { passive: true });
+                    document.addEventListener('touchend', function () { d = false; });
                 },
-
                 async loadTracks() {
-                    state.isLoading = true;
-                    UI.renderSkeleton();
+                    state.isLoading = true; UI.renderSkeleton();
                     try {
-                        const data = await Api.fetchTracks();
-                        state.tracks = data.tracks || [];
-                        state.playlists = data.playlists || [];
-                        state.isLoading = false;
-                        UI.applyFilter();
-                        UI.renderPlaylistNav();
+                        var data = await Api.fetchTracks();
+                        state.tracks = data.tracks || []; state.playlists = data.playlists || [];
+                        state.isLoading = false; UI.applyFilter(); UI.renderPlaylistNav();
                     } catch (e) {
                         state.isLoading = false;
+                        if (e.message === 'NO_AUTH') return;
                         UI.renderError(e.message);
                     }
                 },
-
                 applyFilter() {
-                    const query = state.searchQuery.toLowerCase();
-                    let base = state.tracks;
-
-                    if (state.activePlaylistId !== 'all') {
-                        base = base.filter(t => t.playlists && t.playlists.includes(state.activePlaylistId));
-                    }
-
-                    state.filteredTracks = query
-                        ? base.filter(t => t.title.toLowerCase().includes(query) || t.artist.toLowerCase().includes(query))
-                        : base;
-
-                    UI.renderPlaylist();
-                    UI.updateTrackCount();
+                    var q = state.searchQuery.toLowerCase(), base = state.tracks;
+                    if (state.activePlaylistId !== 'all') base = base.filter(function (t) { return t.playlists && t.playlists.indexOf(state.activePlaylistId) >= 0; });
+                    state.filteredTracks = q ? base.filter(function (t) { return t.title.toLowerCase().indexOf(q) >= 0 || t.artist.toLowerCase().indexOf(q) >= 0; }) : base;
+                    UI.renderPlaylist(); UI.updateTrackCount();
                 },
-
                 renderPlaylistNav() {
-                    const container = document.getElementById('playlist-nav');
-                    container.innerHTML = state.playlists.map(p =>
-                        `<div class="nav-item ${state.activePlaylistId === p.id ? 'active' : ''}" data-action="switch-pl" data-playlist-id="${p.id}">
-                            <i class="fa-solid fa-list-ul"></i>
-                            <span class="flex-1 truncate">${p.name}</span>
-                            <button class="ctrl-btn pl-delete text-xs" data-action="delete-pl" data-playlist-id="${p.id}">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>`
-                    ).join('');
+                    document.getElementById('playlist-nav').innerHTML = state.playlists.map(function (p) {
+                        return '<div class="nav-item ' + (state.activePlaylistId === p.id ? 'active' : '') + '" data-action="switch-pl" data-playlist-id="' + p.id + '"><i class="fa-solid fa-list-ul"></i><span class="flex-1 truncate">' + p.name + '</span><button class="ctrl-btn pl-delete text-xs" data-action="delete-pl" data-playlist-id="' + p.id + '"><i class="fa-solid fa-xmark"></i></button></div>';
+                    }).join('');
                 },
-
                 renderSkeleton() {
-                    const list = document.getElementById('track-list');
-                    let html = '';
-                    for (let i = 0; i < 5; i++) {
-                        html += `<div class="track-row" style="cursor:default;">
-                            <div class="skeleton" style="width:20px;height:16px;"></div>
-                            <div class="skeleton" style="width:48px;height:36px;"></div>
-                            <div class="space-y-2">
-                                <div class="skeleton" style="width:60%;height:14px;"></div>
-                                <div class="skeleton" style="width:40%;height:12px;"></div>
-                            </div>
-                            <div class="skeleton track-artist-col" style="width:60%;height:12px;"></div>
-                            <div class="skeleton track-duration-col" style="width:30px;height:12px;margin-left:auto;"></div>
-                            <div></div>
-                        </div>`;
-                    }
-                    list.innerHTML = html;
+                    var l = document.getElementById('track-list'), h = '';
+                    for (var i = 0; i < 5; i++) h += '<div class="track-row" style="cursor:default;"><div class="skeleton" style="width:20px;height:16px;"></div><div class="skeleton" style="width:48px;height:36px;"></div><div class="space-y-2"><div class="skeleton" style="width:60%;height:14px;"></div><div class="skeleton" style="width:40%;height:12px;"></div></div><div class="skeleton track-artist-col" style="width:60%;height:12px;"></div><div class="skeleton track-duration-col" style="width:30px;height:12px;margin-left:auto;"></div><div></div></div>';
+                    l.innerHTML = h;
                 },
-
-                renderError(message) {
-                    document.getElementById('error-container').innerHTML =
-                        `<div class="p-4 rounded-xl v-err">Gagal memuat: ${message}</div>`;
-                    document.getElementById('track-list').innerHTML = '';
-                },
-
+                renderError(m) { document.getElementById('error-container').innerHTML = '<div class="p-4 rounded-xl v-err">Gagal memuat: ' + m + '</div>'; document.getElementById('track-list').innerHTML = ''; },
                 renderPlaylist() {
-                    const list = document.getElementById('track-list');
-                    const tracks = state.filteredTracks;
-                    const query = state.searchQuery;
-
-                    if (state.isLoading) {
-                        UI.renderSkeleton();
-                        return;
-                    }
-
-                    if (tracks.length === 0) {
-                        list.innerHTML = `<div class="flex flex-col items-center justify-center py-16 v-muted">
-                            <i class="fa-solid fa-music text-4xl mb-4"></i>
-                            <p class="text-lg font-display font-semibold">Tidak ada lagu</p>
-                        </div>`;
-                        return;
-                    }
-
-                    let html = '';
-                    tracks.forEach((track, displayIdx) => {
-                        const globalIdx = state.tracks.indexOf(track);
-                        const isActive = globalIdx === state.currentTrackIndex;
-                        const isPlaying = isActive && state.isPlaying;
-                        const title = query ? Utils.highlightText(track.title, query) : track.title;
-                        const artist = query ? Utils.highlightText(track.artist, query) : track.artist;
-
-                        html += `<div class="track-row ${isActive ? 'active' : ''}" data-action="play-track" data-index="${globalIdx}">
-                            <div class="text-center">
-                                <span class="track-num text-sm tabular-nums">${displayIdx + 1}</span>
-                                <div class="track-eq eq-bars ${isPlaying ? '' : 'eq-paused'}">
-                                    <div class="eq-bar"></div>
-                                    <div class="eq-bar"></div>
-                                    <div class="eq-bar"></div>
-                                </div>
-                                <div class="track-play-icon items-center justify-center">
-                                    <i class="fa-solid fa-play text-xs"></i>
-                                </div>
-                            </div>
-                            <img class="track-thumb" src="https://img.youtube.com/vi/${track.videoId}/default.jpg" alt="" loading="lazy">
-                            <div class="min-w-0">
-                                <p class="track-title text-sm font-medium truncate">${title}</p>
-                                <p class="text-xs truncate mt-0.5 track-sub">${artist}</p>
-                            </div>
-                            <p class="track-artist-col text-sm truncate">${artist}</p>
-                            <p class="track-duration-col text-sm tabular-nums text-right">${track.duration ? Utils.formatTime(track.duration) : '--:--'}</p>
-                            <button class="ctrl-btn text-sm" data-action="open-move" data-video-id="${track.videoId}" title="Pindah ke Playlist">
-                                <i class="fa-solid fa-folder-plus"></i>
-                            </button>
-                        </div>`;
+                    var l = document.getElementById('track-list'), tracks = state.filteredTracks, q = state.searchQuery;
+                    if (state.isLoading) { UI.renderSkeleton(); return; }
+                    if (!tracks.length) { l.innerHTML = '<div class="flex flex-col items-center justify-center py-16 v-muted"><i class="fa-solid fa-music text-4xl mb-4"></i><p class="text-lg font-display font-semibold">Tidak ada lagu</p></div>'; return; }
+                    var h = '';
+                    tracks.forEach(function (tr, di) {
+                        var gi = state.tracks.indexOf(tr), isA = gi === state.currentTrackIndex, isP = isA && state.isPlaying;
+                        var title = q ? Utils.highlightText(tr.title, q) : tr.title;
+                        var artist = q ? Utils.highlightText(tr.artist, q) : tr.artist;
+                        h += '<div class="track-row ' + (isA ? 'active' : '') + '" data-action="play-track" data-index="' + gi + '"><div class="text-center"><span class="track-num text-sm tabular-nums">' + (di + 1) + '</span><div class="track-eq eq-bars ' + (isP ? '' : 'eq-paused') + '"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div><div class="track-play-icon items-center justify-center"><i class="fa-solid fa-play text-xs"></i></div></div><img class="track-thumb" src="https://img.youtube.com/vi/' + tr.videoId + '/default.jpg" alt="" loading="lazy"><div class="min-w-0"><p class="track-title text-sm font-medium truncate">' + title + '</p><p class="text-xs truncate mt-0.5 track-sub">' + artist + '</p></div><p class="track-artist-col text-sm truncate">' + artist + '</p><p class="track-duration-col text-sm tabular-nums text-right">' + (tr.duration ? Utils.formatTime(tr.duration) : '--:--') + '</p><button class="ctrl-btn text-sm" data-action="open-move" data-video-id="' + tr.videoId + '" title="Pindah ke Playlist"><i class="fa-solid fa-folder-plus"></i></button></div>';
                     });
-
-                    list.innerHTML = html;
+                    l.innerHTML = h;
                 },
-
                 updatePlayerBar() {
-                    const track = state.tracks[state.currentTrackIndex];
-                    if (track) {
-                        document.getElementById('player-thumb').src = `https://img.youtube.com/vi/${track.videoId}/mqdefault.jpg`;
-                        document.getElementById('player-title').textContent = track.title;
-                        document.getElementById('player-artist').textContent = track.artist;
-                    } else {
-                        document.getElementById('player-title').textContent = 'Tidak ada lagu';
-                        document.getElementById('player-artist').textContent = '—';
-                    }
+                    var t = state.tracks[state.currentTrackIndex];
+                    if (t) { document.getElementById('player-thumb').src = 'https://img.youtube.com/vi/' + t.videoId + '/mqdefault.jpg'; document.getElementById('player-title').textContent = t.title; document.getElementById('player-artist').textContent = t.artist; }
+                    else { document.getElementById('player-title').textContent = 'Tidak ada lagu'; document.getElementById('player-artist').textContent = '—'; }
                     UI.updatePlayButton();
                 },
-
-                updatePlayButton() {
-                    document.getElementById('play-icon').className =
-                        state.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-                },
-
+                updatePlayButton() { document.getElementById('play-icon').className = state.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play'; },
                 updateVolumeUI() {
-                    const displayVol = state.isMuted ? 0 : state.volume;
-                    document.getElementById('volume-fill').style.width = displayVol + '%';
-
-                    const icon = document.getElementById('volume-icon');
-                    if (state.isMuted || displayVol === 0) {
-                        icon.className = 'fa-solid fa-volume-xmark text-sm';
-                    } else if (displayVol < 50) {
-                        icon.className = 'fa-solid fa-volume-low text-sm';
-                    } else {
-                        icon.className = 'fa-solid fa-volume-high text-sm';
-                    }
+                    var d = state.isMuted ? 0 : state.volume;
+                    document.getElementById('volume-fill').style.width = d + '%';
+                    var i = document.getElementById('volume-icon');
+                    i.className = (state.isMuted || d === 0) ? 'fa-solid fa-volume-xmark text-sm' : d < 50 ? 'fa-solid fa-volume-low text-sm' : 'fa-solid fa-volume-high text-sm';
                 },
-
                 startProgressLoop() {
                     UI.stopProgressLoop();
                     function tick() {
                         if (ytReady && ytPlayer.getCurrentTime && state.isPlaying) {
-                            const current = ytPlayer.getCurrentTime() || 0;
-                            const duration = ytPlayer.getDuration() || 0;
-                            const percent = duration > 0 ? (current / duration) * 100 : 0;
-
-                            document.getElementById('progress-fill').style.width = percent + '%';
-                            document.getElementById('progress-fill-inline').style.width = percent + '%';
-                            document.getElementById('time-current').textContent = Utils.formatTime(current);
-                            document.getElementById('time-total').textContent = Utils.formatTime(duration);
+                            var c = ytPlayer.getCurrentTime() || 0, d = ytPlayer.getDuration() || 0, p = d > 0 ? (c / d) * 100 : 0;
+                            document.getElementById('progress-fill').style.width = p + '%';
+                            document.getElementById('progress-fill-inline').style.width = p + '%';
+                            document.getElementById('time-current').textContent = Utils.formatTime(c);
+                            document.getElementById('time-total').textContent = Utils.formatTime(d);
                         }
                         progressAnimId = requestAnimationFrame(tick);
                     }
                     progressAnimId = requestAnimationFrame(tick);
                 },
-
-                stopProgressLoop() {
-                    if (progressAnimId) {
-                        cancelAnimationFrame(progressAnimId);
-                        progressAnimId = null;
-                    }
-                },
-
-                updateTrackCount() {
-                    document.getElementById('track-count').textContent = `${state.filteredTracks.length} lagu`;
-                },
-
-                /** Perbarui highlight nav item "Semua Lagu" di sidebar utama */
-                updateMainNavActive() {
-                    const mainNavItems = document.querySelectorAll('#main-nav .nav-item');
-                    mainNavItems.forEach(item => {
-                        item.classList.toggle('active', item.dataset.playlistId === state.activePlaylistId);
-                    });
-                }
+                stopProgressLoop() { if (progressAnimId) { cancelAnimationFrame(progressAnimId); progressAnimId = null; } },
+                updateTrackCount() { document.getElementById('track-count').textContent = state.filteredTracks.length + ' lagu'; },
+                updateMainNavActive() { document.querySelectorAll('#main-nav .nav-item').forEach(function (n) { n.classList.toggle('active', n.dataset.playlistId === state.activePlaylistId); }); }
             };
 
-            /* ═══════════════════════════════════════
-               Event Delegation — semua klik dari HTML
-            ═══════════════════════════════════════ */
-            document.addEventListener('click', (e) => {
-                const target = e.target.closest('[data-action]');
+            /* ═══ Event Delegation ═══ */
+            document.addEventListener('click', function (e) {
+                var target = e.target.closest('[data-action]');
                 if (!target) return;
-
-                const action = target.dataset.action;
-
+                var action = target.dataset.action;
                 switch (action) {
-                    case 'switch-pl':
-                        e.stopPropagation();
-                        TT.switchPlaylist(target.dataset.playlistId);
-                        break;
-
-                    case 'delete-pl':
-                        e.stopPropagation();
-                        TT.deletePlaylist(target.dataset.playlistId);
-                        break;
-
-                    case 'play-track':
-                        TT.playTrack(parseInt(target.dataset.index, 10));
-                        break;
-
-                    case 'open-move':
-                        e.stopPropagation();
-                        TT.openMoveTrack(target.dataset.videoId);
-                        break;
-
-                    case 'open-modal':
-                        TT.openModal(target.dataset.modal);
-                        break;
-
-                    case 'close-modal':
-                        TT.closeModal(target.dataset.modal);
-                        break;
-
-                    case 'toggle-play':
-                        TT.togglePlay();
-                        break;
-
-                    case 'next':
-                        TT.next();
-                        break;
-
-                    case 'prev':
-                        TT.prev();
-                        break;
-
-                    case 'toggle-shuffle':
-                        TT.toggleShuffle();
-                        break;
-
-                    case 'toggle-repeat':
-                        TT.toggleRepeat();
-                        break;
-
-                    case 'toggle-mute':
-                        TT.toggleMute();
-                        break;
-
-                    case 'load-tracks':
-                        TT.loadTracks();
-                        break;
-
-                    case 'submit-track':
-                        TT.submitNewTrack();
-                        break;
-
-                    case 'create-playlist':
-                        TT.createPlaylist();
-                        break;
-
-                    case 'save-move':
-                        TT.saveMoveTrack();
-                        break;
-
-                    case 'open-sidebar':
-                        TT.openSidebar();
-                        break;
-
-                    case 'close-sidebar':
-                        TT.closeSidebar();
-                        break;
+                    case 'switch-pl': e.stopPropagation(); TT.switchPlaylist(target.dataset.playlistId); break;
+                    case 'delete-pl': e.stopPropagation(); TT.deletePlaylist(target.dataset.playlistId); break;
+                    case 'play-track': TT.playTrack(parseInt(target.dataset.index, 10)); break;
+                    case 'open-move': e.stopPropagation(); TT.openMoveTrack(target.dataset.videoId); break;
+                    case 'open-modal': TT.openModal(target.dataset.modal); break;
+                    case 'close-modal': TT.closeModal(target.dataset.modal); break;
+                    case 'toggle-play': TT.togglePlay(); break;
+                    case 'next': TT.next(); break;
+                    case 'prev': TT.prev(); break;
+                    case 'toggle-shuffle': TT.toggleShuffle(); break;
+                    case 'toggle-repeat': TT.toggleRepeat(); break;
+                    case 'toggle-mute': TT.toggleMute(); break;
+                    case 'load-tracks': TT.loadTracks(); break;
+                    case 'submit-track': TT.submitNewTrack(); break;
+                    case 'create-playlist': TT.createPlaylist(); break;
+                    case 'save-move': TT.saveMoveTrack(); break;
+                    case 'open-sidebar': TT.openSidebar(); break;
+                    case 'close-sidebar': TT.closeSidebar(); break;
+                    case 'logout': TT.logout(); break;
                 }
             });
 
-            /* ═══════════════════════════════════════
-               Public API — dipanggil dari event delegation
-            ═══════════════════════════════════════ */
+            /* ═══ Public API ═══ */
             return {
                 init() {
+                    if (!checkAuth()) return;
+                    state.username = Storage.get('username', 'User');
+                    document.getElementById('sidebar-username').textContent = state.username;
                     Player.init();
                     UI.init();
                 },
-
-                openModal(id) {
-                    document.getElementById(id).classList.add('show');
-                },
-
-                closeModal(id) {
-                    document.getElementById(id).classList.remove('show');
-                },
-
-                openSidebar() {
-                    document.getElementById('sidebar').classList.add('open');
-                    document.getElementById('sidebar-overlay').classList.add('show');
-                },
-
-                closeSidebar() {
-                    document.getElementById('sidebar').classList.remove('open');
-                    document.getElementById('sidebar-overlay').classList.remove('show');
-                },
-
-                togglePlay() {
-                    if (!ytReady || state.currentTrackIndex < 0) return;
-                    if (state.isPlaying) ytPlayer.pauseVideo();
-                    else ytPlayer.playVideo();
-                },
-
+                openModal(id) { document.getElementById(id).classList.add('show'); },
+                closeModal(id) { document.getElementById(id).classList.remove('show'); },
+                openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('show'); },
+                closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); },
+                togglePlay() { if (!ytReady || state.currentTrackIndex < 0) return; if (state.isPlaying) ytPlayer.pauseVideo(); else ytPlayer.playVideo(); },
                 next() { Player.next(); },
                 prev() { Player.prev(); },
-
-                toggleShuffle() {
-                    state.shuffle = !state.shuffle;
-                    state.shuffleOrder = [];
-                    document.getElementById('btn-shuffle').classList.toggle('active', state.shuffle);
-                    toast(state.shuffle ? 'Acak Aktif' : 'Acak Mati', 'info');
-                },
-
+                toggleShuffle() { state.shuffle = !state.shuffle; state.shuffleOrder = []; document.getElementById('btn-shuffle').classList.toggle('active', state.shuffle); toast(state.shuffle ? 'Acak Aktif' : 'Acak Mati', 'info'); },
                 toggleRepeat() {
-                    const modes = ['off', 'all', 'one'];
-                    const currentIdx = modes.indexOf(state.repeat);
-                    state.repeat = modes[(currentIdx + 1) % 3];
-
-                    const btn = document.getElementById('btn-repeat');
-                    const icon = document.getElementById('repeat-icon');
-                    btn.classList.toggle('active', state.repeat !== 'off');
-
-                    // Hapus badge "1" jika ada
-                    const existingBadge = btn.querySelector('.repeat-badge');
-                    if (existingBadge) existingBadge.remove();
-
-                    if (state.repeat === 'one') {
-                        const badge = document.createElement('span');
-                        badge.className = 'repeat-badge absolute text-[8px] font-bold v-accent';
-                        badge.textContent = '1';
-                        btn.appendChild(badge);
-                    }
-
-                    const labels = { off: 'Ulangi Mati', all: 'Ulangi Semua', one: 'Ulangi Satu' };
-                    toast(labels[state.repeat], 'info');
+                    var modes = ['off', 'all', 'one'], ci = modes.indexOf(state.repeat); state.repeat = modes[(ci + 1) % 3];
+                    var btn = document.getElementById('btn-repeat'); btn.classList.toggle('active', state.repeat !== 'off');
+                    var badge = btn.querySelector('.repeat-badge'); if (badge) badge.remove();
+                    if (state.repeat === 'one') { var b = document.createElement('span'); b.className = 'repeat-badge absolute text-[8px] font-bold v-accent'; b.textContent = '1'; btn.appendChild(b); }
+                    toast({ off: 'Ulangi Mati', all: 'Ulangi Semua', one: 'Ulangi Satu' }[state.repeat], 'info');
                 },
-
-                toggleMute() {
-                    state.isMuted = !state.isMuted;
-                    if (ytReady) ytPlayer.setVolume(state.isMuted ? 0 : state.volume);
-                    Storage.set('muted', state.isMuted);
-                    UI.updateVolumeUI();
-                },
-
-                playTrack(idx) {
-                    const track = state.tracks[idx];
-                    if (track) Player.play(track.videoId, idx);
-                },
-
-                switchPlaylist(id) {
-                    state.activePlaylistId = id;
-                    UI.applyFilter();
-                    UI.renderPlaylistNav();
-                    UI.updateMainNavActive();
-
-                    const pl = state.playlists.find(p => p.id === id);
-                    document.getElementById('greeting').textContent = id === 'all' ? 'Semua Lagu' : pl ? pl.name : 'Playlist';
-                    TT.closeSidebar();
-                },
-
+                toggleMute() { state.isMuted = !state.isMuted; if (ytReady) ytPlayer.setVolume(state.isMuted ? 0 : state.volume); Storage.set('muted', state.isMuted); UI.updateVolumeUI(); },
+                playTrack(idx) { var t = state.tracks[idx]; if (t) Player.play(t.videoId, idx); },
+                switchPlaylist(id) { state.activePlaylistId = id; UI.applyFilter(); UI.renderPlaylistNav(); UI.updateMainNavActive(); var pl = state.playlists.find(function (p) { return p.id === id; }); document.getElementById('greeting').textContent = id === 'all' ? 'Semua Lagu' : pl ? pl.name : 'Playlist'; TT.closeSidebar(); },
                 async submitNewTrack() {
-                    const btnEl = document.getElementById('btn-submit-track');
-                    const errorEl = document.getElementById('modal-error-add');
-                    errorEl.classList.add('hidden');
-
-                    const url = document.getElementById('input-url').value.trim();
-                    const title = document.getElementById('input-title').value.trim();
-                    const artist = document.getElementById('input-artist').value.trim() || 'Unknown';
-                    const videoId = Utils.extractVideoId(url);
-
-                    if (!videoId) { errorEl.textContent = 'URL tidak valid'; errorEl.classList.remove('hidden'); return; }
-                    if (!title) { errorEl.textContent = 'Judul wajib diisi'; errorEl.classList.remove('hidden'); return; }
-                    if (state.tracks.some(t => t.videoId === videoId)) { errorEl.textContent = 'Lagu sudah ada'; errorEl.classList.remove('hidden'); return; }
-
-                    setBtnLoading(btnEl, true);
+                    var btn = document.getElementById('btn-submit-track'), err = document.getElementById('modal-error-add'); err.classList.add('hidden');
+                    var url = document.getElementById('input-url').value.trim(), title = document.getElementById('input-title').value.trim(), artist = document.getElementById('input-artist').value.trim() || 'Unknown', vid = Utils.extractVideoId(url);
+                    if (!vid) { err.textContent = 'URL tidak valid'; err.classList.remove('hidden'); return; }
+                    if (!title) { err.textContent = 'Judul wajib diisi'; err.classList.remove('hidden'); return; }
+                    if (state.tracks.some(function (x) { return x.videoId === vid; })) { err.textContent = 'Lagu sudah ada'; err.classList.remove('hidden'); return; }
+                    setBtnLoading(btn, true);
                     try {
-                        const result = await Api.post({
-                            action: 'addTrack',
-                            videoId, title, artist,
-                            duration: 0,
-                            playlists: []
-                        });
-
-                        state.tracks.push({
-                            id: String(state.tracks.length + 1),
-                            videoId, title, artist,
-                            duration: 0,
-                            playlists: []
-                        });
-
-                        UI.applyFilter();
-                        toast(result.demo ? 'Ditambahkan (lokal)' : 'Berhasil ditambahkan', 'success');
-                        TT.closeModal('modal-add-track');
-
-                        // Reset form
-                        document.getElementById('input-url').value = '';
-                        document.getElementById('input-title').value = '';
-                        document.getElementById('input-artist').value = '';
-                        document.getElementById('url-preview').classList.add('hidden');
-                    } catch (err) {
-                        errorEl.textContent = err.message;
-                        errorEl.classList.remove('hidden');
-                    } finally {
-                        setBtnLoading(btnEl, false);
-                    }
+                        await Api.post({ action: 'addTrack', videoId: vid, title: title, artist: artist, duration: 0, playlists: [] });
+                        state.tracks.push({ id: String(state.tracks.length + 1), videoId: vid, title: title, artist: artist, duration: 0, playlists: [] });
+                        UI.applyFilter(); toast('Berhasil ditambahkan', 'success'); TT.closeModal('modal-add-track');
+                        document.getElementById('input-url').value = ''; document.getElementById('input-title').value = ''; document.getElementById('input-artist').value = ''; document.getElementById('url-preview').classList.add('hidden');
+                    } catch (e) { if (e.message !== 'NO_AUTH') { err.textContent = e.message; err.classList.remove('hidden'); } } finally { setBtnLoading(btn, false); }
                 },
-
                 async createPlaylist() {
-                    const btnEl = document.getElementById('btn-create-pl');
-                    const errorEl = document.getElementById('modal-error-pl');
-                    errorEl.classList.add('hidden');
-
-                    const name = document.getElementById('input-pl-name').value.trim();
-                    if (!name) { errorEl.textContent = 'Nama wajib diisi'; errorEl.classList.remove('hidden'); return; }
-
-                    setBtnLoading(btnEl, true);
+                    var btn = document.getElementById('btn-create-pl'), err = document.getElementById('modal-error-pl'); err.classList.add('hidden');
+                    var name = document.getElementById('input-pl-name').value.trim();
+                    if (!name) { err.textContent = 'Nama wajib diisi'; err.classList.remove('hidden'); return; }
+                    setBtnLoading(btn, true);
                     try {
-                        const result = await Api.post({ action: 'createPlaylist', name });
-                        const newPl = result.demo
-                            ? { id: Date.now().toString(), name }
-                            : { id: result.id, name };
-
-                        state.playlists.push(newPl);
-                        UI.renderPlaylistNav();
-                        toast('Playlist dibuat', 'success');
-                        TT.closeModal('modal-create-pl');
-                        document.getElementById('input-pl-name').value = '';
-                    } catch (err) {
-                        errorEl.textContent = err.message;
-                        errorEl.classList.remove('hidden');
-                    } finally {
-                        setBtnLoading(btnEl, false);
-                    }
+                        var r = await Api.post({ action: 'createPlaylist', name: name });
+                        state.playlists.push({ id: r.id, name: name }); UI.renderPlaylistNav(); toast('Playlist dibuat', 'success'); TT.closeModal('modal-create-pl'); document.getElementById('input-pl-name').value = '';
+                    } catch (e) { if (e.message !== 'NO_AUTH') { err.textContent = e.message; err.classList.remove('hidden'); } } finally { setBtnLoading(btn, false); }
                 },
-
                 async deletePlaylist(id) {
-                    setBtnLoading(null, false); // Tidak ada tombol spesifik, gunakan toast sebagai feedback
                     try {
-                        await Api.post({ action: 'deletePlaylist', id });
-                        state.playlists = state.playlists.filter(p => p.id !== id);
-
-                        // Hapus referensi playlist dari semua track
-                        state.tracks.forEach(t => {
-                            if (t.playlists) t.playlists = t.playlists.filter(p => p !== id);
-                        });
-
+                        await Api.post({ action: 'deletePlaylist', id: id });
+                        state.playlists = state.playlists.filter(function (p) { return p.id !== id; });
+                        state.tracks.forEach(function (t) { if (t.playlists) t.playlists = t.playlists.filter(function (p) { return p !== id; }); });
                         if (state.activePlaylistId === id) TT.switchPlaylist('all');
-                        UI.renderPlaylistNav();
-                        UI.applyFilter();
-                        toast('Playlist dihapus', 'info');
-                    } catch (err) {
-                        toast(err.message, 'error');
-                    }
+                        UI.renderPlaylistNav(); UI.applyFilter(); toast('Playlist dihapus', 'info');
+                    } catch (e) { if (e.message !== 'NO_AUTH') toast(e.message, 'error'); }
                 },
-
                 openMoveTrack(videoId) {
                     state.movingTrackId = videoId;
-                    const track = state.tracks.find(t => t.videoId === videoId);
-                    const container = document.getElementById('move-track-playlists');
-
-                    if (state.playlists.length === 0) {
-                        container.innerHTML = '<p class="text-sm text-center v-muted">Belum ada playlist. Buat dulu di sidebar.</p>';
-                    } else {
-                        container.innerHTML = state.playlists.map(p =>
-                            `<label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer pl-move-item">
-                                <input type="checkbox" value="${p.id}" class="pl-checkbox"
-                                    ${track && track.playlists && track.playlists.includes(p.id) ? 'checked' : ''}>
-                                <span class="v-text">${p.name}</span>
-                            </label>`
-                        ).join('');
-                    }
-
+                    var track = state.tracks.find(function (t) { return t.videoId === videoId; }), c = document.getElementById('move-track-playlists');
+                    if (!state.playlists.length) { c.innerHTML = '<p class="text-sm text-center v-muted">Belum ada playlist. Buat dulu di sidebar.</p>'; }
+                    else { c.innerHTML = state.playlists.map(function (p) { return '<label class="flex items-center gap-3 p-3 rounded-lg cursor-pointer pl-move-item"><input type="checkbox" value="' + p.id + '" class="pl-checkbox" ' + (track && track.playlists && track.playlists.indexOf(p.id) >= 0 ? 'checked' : '') + '><span class="v-text">' + p.name + '</span></label>'; }).join(''); }
                     TT.openModal('modal-move-track');
                 },
-
                 async saveMoveTrack() {
-                    const btnEl = document.getElementById('btn-save-move');
-                    const checkboxes = document.querySelectorAll('#move-track-playlists input[type="checkbox"]');
-                    const selectedPlaylists = [];
-                    checkboxes.forEach(cb => { if (cb.checked) selectedPlaylists.push(cb.value); });
-
-                    const track = state.tracks.find(t => t.videoId === state.movingTrackId);
-                    if (!track) return;
-
-                    setBtnLoading(btnEl, true);
+                    var btn = document.getElementById('btn-save-move'), cbs = document.querySelectorAll('#move-track-playlists input[type="checkbox"]'), pls = [];
+                    cbs.forEach(function (cb) { if (cb.checked) pls.push(cb.value); });
+                    var track = state.tracks.find(function (t) { return t.videoId === state.movingTrackId; }); if (!track) return;
+                    setBtnLoading(btn, true);
                     try {
-                        await Api.post({
-                            action: 'moveTrack',
-                            trackId: track.videoId,
-                            playlists: selectedPlaylists
-                        });
-
-                        track.playlists = selectedPlaylists;
-                        UI.applyFilter();
-                        toast('Playlist lagu diperbarui', 'success');
-                        TT.closeModal('modal-move-track');
-                    } catch (err) {
-                        toast(err.message, 'error');
-                    } finally {
-                        setBtnLoading(btnEl, false);
-                    }
-                }
+                        await Api.post({ action: 'moveTrack', trackId: track.videoId, playlists: pls });
+                        track.playlists = pls; UI.applyFilter(); toast('Playlist lagu diperbarui', 'success'); TT.closeModal('modal-move-track');
+                    } catch (e) { if (e.message !== 'NO_AUTH') toast(e.message, 'error'); } finally { setBtnLoading(btn, false); }
+                },
+                logout() { forceLogout('Berhasil keluar'); }
             };
         })();
-
         document.addEventListener('DOMContentLoaded', TT.init);
     </script>
 </body>
