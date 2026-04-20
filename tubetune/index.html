@@ -3,13 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>TubeTune — YouTube Music Streamer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" href="favicon.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         tailwind.config = {
@@ -33,154 +35,770 @@
             --danger: #e74c3c;
             --warning: #f0a500;
         }
-        * { box-sizing: border-box; }
-        body { margin: 0; background: var(--bg-base); color: var(--text-primary); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-        .v-text { color: var(--text-primary); }
-        .v-text2 { color: var(--text-secondary); }
-        .v-muted { color: var(--text-muted); }
-        .v-accent { color: var(--accent); }
-        .v-danger { color: var(--danger); }
-        .v-warning { color: var(--warning); }
-        .v-info { color: #5dade2; }
-        .v-bg { background: var(--bg-base); }
-        .v-surface { background: var(--bg-surface); }
-        .v-elevated { background: var(--bg-elevated); }
-        .v-hover { background: var(--bg-hover); }
-        .v-accent-dim { background: var(--accent-dim); }
-        .v-border { border-color: var(--border); }
-        .v-btn { background: var(--accent); color: var(--bg-base); transition: background 0.2s; }
-        .v-btn:hover { background: var(--accent-hover); }
-        .v-err { background: rgba(231, 76, 60, 0.12); color: var(--danger); }
-        .v-err-border { background: var(--bg-base); border: 1px solid var(--border); }
-        .v-border-t { border-top: 1px solid var(--border); }
-        .divider-themed { border-color: var(--border); }
-        .header-gradient { background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%); }
-        .player-bar-base { background: var(--bg-surface); border-top: 1px solid var(--border); min-height: 88px; }
-        .logo-icon { color: var(--bg-base); }
-        .pl-delete { padding: 4px; opacity: 0; transition: opacity 0.2s; }
-        .nav-item:hover .pl-delete { opacity: 1; }
-        .pl-move-item { transition: background 0.15s; }
-        .pl-move-item:hover { background: var(--bg-hover); }
-        .pl-checkbox { accent-color: var(--accent); width: 1rem; height: 1rem; }
+        .h-dynamic-screen {
+            height: 100vh;
+            height: 100dvh;
+        }
 
-        .btn-loading { position: relative; pointer-events: none; opacity: 0.7; }
+        .player-safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-base);
+            color: var(--text-primary);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .v-text {
+            color: var(--text-primary);
+        }
+
+        .v-text2 {
+            color: var(--text-secondary);
+        }
+
+        .v-muted {
+            color: var(--text-muted);
+        }
+
+        .v-accent {
+            color: var(--accent);
+        }
+
+        .v-danger {
+            color: var(--danger);
+        }
+
+        .v-warning {
+            color: var(--warning);
+        }
+
+        .v-info {
+            color: #5dade2;
+        }
+
+        .v-bg {
+            background: var(--bg-base);
+        }
+
+        .v-surface {
+            background: var(--bg-surface);
+        }
+
+        .v-elevated {
+            background: var(--bg-elevated);
+        }
+
+        .v-hover {
+            background: var(--bg-hover);
+        }
+
+        .v-accent-dim {
+            background: var(--accent-dim);
+        }
+
+        .v-border {
+            border-color: var(--border);
+        }
+
+        .v-btn {
+            background: var(--accent);
+            color: var(--bg-base);
+            transition: background 0.2s;
+        }
+
+        .v-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .v-err {
+            background: rgba(231, 76, 60, 0.12);
+            color: var(--danger);
+        }
+
+        .v-err-border {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+        }
+
+        .v-border-t {
+            border-top: 1px solid var(--border);
+        }
+
+        .divider-themed {
+            border-color: var(--border);
+        }
+
+        .header-gradient {
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+        }
+
+        .player-bar-base {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            min-height: 88px;
+        }
+
+        .logo-icon {
+            color: var(--bg-base);
+        }
+
+        .pl-delete {
+            padding: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .nav-item:hover .pl-delete {
+            opacity: 1;
+        }
+
+        .pl-move-item {
+            transition: background 0.15s;
+        }
+
+        .pl-move-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .pl-checkbox {
+            accent-color: var(--accent);
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
         .btn-loading::after {
-            content: ''; display: inline-block; width: 14px; height: 14px;
-            border: 2px solid transparent; border-top-color: currentColor;
-            border-radius: 50%; animation: spin 0.6s linear infinite;
-            margin-left: 8px; vertical-align: middle;
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .bg-blob { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(140px); opacity: 0.08; }
-        .bg-blob-1 { width: 600px; height: 600px; top: -150px; left: -100px; background: var(--accent); animation: blobFloat 25s ease-in-out infinite; }
-        .bg-blob-2 { width: 500px; height: 500px; bottom: -100px; right: -80px; background: #e74c3c; animation: blobFloat 30s ease-in-out infinite reverse; }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(140px);
+            opacity: 0.08;
+        }
+
+        .bg-blob-1 {
+            width: 600px;
+            height: 600px;
+            top: -150px;
+            left: -100px;
+            background: var(--accent);
+            animation: blobFloat 25s ease-in-out infinite;
+        }
+
+        .bg-blob-2 {
+            width: 500px;
+            height: 500px;
+            bottom: -100px;
+            right: -80px;
+            background: #e74c3c;
+            animation: blobFloat 30s ease-in-out infinite reverse;
+        }
+
         @keyframes blobFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(40px, -30px) scale(1.05); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(40px, -30px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
         }
 
-        #sidebar { background: var(--bg-surface); border-right: 1px solid var(--border); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 40; }
+        #sidebar {
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 40;
+        }
+
         @media (max-width: 767px) {
-            #sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
-            #sidebar.open { transform: translateX(0); }
+            #sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+            }
+
+            #sidebar.open {
+                transform: translateX(0);
+            }
         }
-        #sidebar-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 35; display: none; }
-        #sidebar-overlay.show { display: block; }
 
-        .nav-item { display: flex; align-items: center; gap: 14px; padding: 10px 20px; border-radius: 8px; color: var(--text-secondary); transition: all 0.2s; cursor: pointer; font-weight: 500; font-size: 14px; }
-        .nav-item:hover { color: var(--text-primary); background: var(--bg-hover); }
-        .nav-item.active { color: var(--accent); background: var(--accent-dim); }
-        .nav-item i { width: 22px; text-align: center; font-size: 16px; }
+        #sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 35;
+            display: none;
+        }
 
-        .track-row { display: grid; grid-template-columns: 40px 48px 1fr 100px 60px 40px; align-items: center; gap: 12px; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+        #sidebar-overlay.show {
+            display: block;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .nav-item i {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .track-row {
+            display: grid;
+            grid-template-columns: 40px 48px 1fr 100px 60px 40px;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
         @media (max-width: 640px) {
-            .track-row { grid-template-columns: 32px 40px 1fr 40px; }
-            .track-row .track-artist-col, .track-row .track-duration-col { display: none; }
+            .track-row {
+                grid-template-columns: 32px 40px 1fr 40px;
+            }
+
+            .track-row .track-artist-col,
+            .track-row .track-duration-col {
+                display: none;
+            }
         }
-        .track-row:hover { background: var(--bg-hover); }
-        .track-row.active { background: var(--accent-dim); }
-        .track-row.active .track-title { color: var(--accent); }
-        .track-row:hover .track-num { display: none; }
-        .track-row:hover .track-play-icon { display: flex !important; }
-        .track-row.active .track-num { display: none; }
-        .track-row.active .track-eq { display: flex !important; }
-        .track-header { color: var(--text-muted); cursor: default; }
-        .track-num { color: var(--text-muted); }
-        .track-play-icon { color: var(--text-primary); display: none; }
-        .track-artist-col { color: var(--text-secondary); }
-        .track-duration-col { color: var(--text-muted); }
-        .track-sub { color: var(--text-secondary); }
 
-        .track-eq { display: none; }
-        .eq-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
-        .eq-bar { width: 3px; border-radius: 1.5px; background: var(--accent); animation: eqBounce 0.6s ease-in-out infinite; }
-        .eq-bar:nth-child(1) { height: 60%; animation-delay: 0s; }
-        .eq-bar:nth-child(2) { height: 100%; animation-delay: 0.15s; }
-        .eq-bar:nth-child(3) { height: 40%; animation-delay: 0.3s; }
-        .eq-paused .eq-bar { animation-play-state: paused; }
-        @keyframes eqBounce { 0%, 100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
+        .track-row:hover {
+            background: var(--bg-hover);
+        }
 
-        .progress-container { position: relative; height: 4px; background: var(--bg-hover); border-radius: 2px; cursor: pointer; transition: height 0.15s; flex: 1; }
-        .progress-container:hover { height: 6px; }
-        .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; position: relative; transition: none; }
-        .progress-container:hover .progress-fill::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
-        .volume-container { position: relative; height: 4px; background: var(--bg-hover); border-radius: 2px; cursor: pointer; width: 100px; transition: height 0.15s; }
-        .volume-container:hover { height: 6px; }
-        .volume-fill { height: 100%; background: var(--text-primary); border-radius: 2px; }
+        .track-row.active {
+            background: var(--accent-dim);
+        }
 
-        #player-bar::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), #00b4d8, var(--accent)); background-size: 200% 100%; opacity: 0; transition: opacity 0.4s; animation: shimmer 3s ease-in-out infinite; }
-        #player-bar.playing::before { opacity: 1; }
-        @keyframes shimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        .track-row.active .track-title {
+            color: var(--accent);
+        }
 
-        .ctrl-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 8px; position: relative; }
-        .ctrl-btn:hover { color: var(--text-primary); transform: scale(1.1); }
-        .ctrl-btn:active { transform: scale(0.95); }
-        .ctrl-btn.active { color: var(--accent); }
-        .ctrl-btn-lg { width: 40px; height: 40px; font-size: 16px; }
-        .ctrl-btn-play { width: 44px; height: 44px; background: var(--accent) !important; color: var(--bg-base) !important; border-radius: 50%; font-size: 18px; }
-        .ctrl-btn-play:hover { background: var(--accent-hover) !important; transform: scale(1.08); }
+        .track-row:hover .track-num {
+            display: none;
+        }
 
-        .input-field { width: 100%; background: var(--bg-base); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text-primary); font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s; }
-        .input-field:focus { border-color: var(--accent); }
-        .input-field::placeholder { color: var(--text-muted); }
-        .track-thumb { width: 48px; height: 36px; border-radius: 4px; object-fit: cover; background: var(--bg-hover); }
-        .player-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: var(--bg-hover); flex-shrink: 0; }
-        .preview-thumb { width: 80px; height: 56px; border-radius: 8px; object-fit: cover; }
+        .track-row:hover .track-play-icon {
+            display: flex !important;
+        }
 
-        .skeleton { background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%); background-size: 200% 100%; animation: skeletonShimmer 1.5s ease-in-out infinite; border-radius: 6px; }
-        @keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .track-row.active .track-num {
+            display: none;
+        }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-overlay.show { display: flex; }
-        .modal-box { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes modalIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .track-row.active .track-eq {
+            display: flex !important;
+        }
 
-        .toast { padding: 12px 20px; border-radius: 10px; font-size: 14px; display: flex; align-items: center; gap: 10px; min-width: 280px; animation: toastIn 0.3s ease-out; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); border: 1px solid var(--border); }
-        .toast-success { background: var(--bg-elevated); color: var(--accent); }
-        .toast-error { background: var(--bg-elevated); color: var(--danger); }
-        .toast-info { background: var(--bg-elevated); color: #5dade2; }
-        .toast-warning { background: var(--bg-elevated); color: var(--warning); }
-        .toast-exit { animation: toastOut 0.3s ease-in forwards; }
-        @keyframes toastIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(60px); } }
+        .track-header {
+            color: var(--text-muted);
+            cursor: default;
+        }
 
-        mark { background: var(--accent-dim); color: var(--accent); border-radius: 2px; padding: 0 2px; }
+        .track-num {
+            color: var(--text-muted);
+        }
+
+        .track-play-icon {
+            color: var(--text-primary);
+            display: none;
+        }
+
+        .track-artist-col {
+            color: var(--text-secondary);
+        }
+
+        .track-duration-col {
+            color: var(--text-muted);
+        }
+
+        .track-sub {
+            color: var(--text-secondary);
+        }
+
+        .track-eq {
+            display: none;
+        }
+
+        .eq-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 16px;
+        }
+
+        .eq-bar {
+            width: 3px;
+            border-radius: 1.5px;
+            background: var(--accent);
+            animation: eqBounce 0.6s ease-in-out infinite;
+        }
+
+        .eq-bar:nth-child(1) {
+            height: 60%;
+            animation-delay: 0s;
+        }
+
+        .eq-bar:nth-child(2) {
+            height: 100%;
+            animation-delay: 0.15s;
+        }
+
+        .eq-bar:nth-child(3) {
+            height: 40%;
+            animation-delay: 0.3s;
+        }
+
+        .eq-paused .eq-bar {
+            animation-play-state: paused;
+        }
+
+        @keyframes eqBounce {
+
+            0%,
+            100% {
+                transform: scaleY(0.3);
+            }
+
+            50% {
+                transform: scaleY(1);
+            }
+        }
+
+        .progress-container {
+            position: relative;
+            height: 4px;
+            background: var(--bg-hover);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: height 0.15s;
+            flex: 1;
+        }
+
+        .progress-container:hover {
+            height: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            position: relative;
+            transition: none;
+        }
+
+        .progress-container:hover .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .volume-container {
+            position: relative;
+            height: 4px;
+            background: var(--bg-hover);
+            border-radius: 2px;
+            cursor: pointer;
+            width: 100px;
+            transition: height 0.15s;
+        }
+
+        .volume-container:hover {
+            height: 6px;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: var(--text-primary);
+            border-radius: 2px;
+        }
+
+        #player-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), #00b4d8, var(--accent));
+            background-size: 200% 100%;
+            opacity: 0;
+            transition: opacity 0.4s;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        #player-bar.playing::before {
+            opacity: 1;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 8px;
+            position: relative;
+        }
+
+        .ctrl-btn:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.95);
+        }
+
+        .ctrl-btn.active {
+            color: var(--accent);
+        }
+
+        .ctrl-btn-lg {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+        }
+
+        .ctrl-btn-play {
+            width: 44px;
+            height: 44px;
+            background: var(--accent) !important;
+            color: var(--bg-base) !important;
+            border-radius: 50%;
+            font-size: 18px;
+        }
+
+        .ctrl-btn-play:hover {
+            background: var(--accent-hover) !important;
+            transform: scale(1.08);
+        }
+
+        .input-field {
+            width: 100%;
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        .track-thumb {
+            width: 48px;
+            height: 36px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: var(--bg-hover);
+        }
+
+        .player-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: var(--bg-hover);
+            flex-shrink: 0;
+        }
+
+        .preview-thumb {
+            width: 80px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s ease-in-out infinite;
+            border-radius: 6px;
+        }
+
+        @keyframes skeletonShimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px;
+            animation: toastIn 0.3s ease-out;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+        }
+
+        .toast-success {
+            background: var(--bg-elevated);
+            color: var(--accent);
+        }
+
+        .toast-error {
+            background: var(--bg-elevated);
+            color: var(--danger);
+        }
+
+        .toast-info {
+            background: var(--bg-elevated);
+            color: #5dade2;
+        }
+
+        .toast-warning {
+            background: var(--bg-elevated);
+            color: var(--warning);
+        }
+
+        .toast-exit {
+            animation: toastOut 0.3s ease-in forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+        }
+
+        mark {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-radius: 2px;
+            padding: 0 2px;
+        }
 
         /* User info di sidebar */
-        .user-card { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 10px; background: var(--bg-hover); margin: 0 12px; }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .user-avatar i { color: var(--accent); font-size: 13px; }
-        .btn-logout { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-        .btn-logout:hover { color: var(--danger); background: rgba(231,76,60,0.1); }
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: var(--bg-hover);
+            margin: 0 12px;
+        }
 
-        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .user-avatar i {
+            color: var(--accent);
+            font-size: 13px;
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        .btn-logout:hover {
+            color: var(--danger);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 
@@ -188,7 +806,7 @@
     <div class="bg-blob bg-blob-1"></div>
     <div class="bg-blob bg-blob-2"></div>
 
-    <div id="app" class="flex flex-col h-screen relative z-10">
+    <div id="app" class="flex flex-col h-dynamic-screen relative z-10">
         <div class="flex flex-1 overflow-hidden">
 
             <!-- ═══════ Sidebar ═══════ -->
@@ -223,7 +841,8 @@
                 <div class="px-3 flex-1 overflow-y-auto">
                     <div class="flex items-center justify-between px-3 mb-2">
                         <span class="text-xs font-semibold uppercase tracking-wider v-muted">Playlist</span>
-                        <button class="ctrl-btn text-xs" data-action="open-modal" data-modal="modal-create-pl" style="opacity:1;">
+                        <button class="ctrl-btn text-xs" data-action="open-modal" data-modal="modal-create-pl"
+                            style="opacity:1;">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -243,12 +862,14 @@
             <!-- ═══════ Main Content ═══════ -->
             <main id="main-content" class="flex-1 overflow-y-auto relative v-bg">
                 <header class="sticky top-0 z-20 px-6 py-4 flex items-center gap-4 header-gradient">
-                    <button id="btn-menu" class="md:hidden ctrl-btn text-lg" data-action="open-sidebar" aria-label="Buka menu">
+                    <button id="btn-menu" class="md:hidden ctrl-btn text-lg" data-action="open-sidebar"
+                        aria-label="Buka menu">
                         <i class="fa-solid fa-bars"></i>
                     </button>
                     <h1 id="greeting" class="font-display font-extrabold text-2xl hidden sm:block">Semua Lagu</h1>
                     <div class="flex-1 max-w-md ml-auto relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm v-muted"></i>
+                        <i
+                            class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm v-muted"></i>
                         <input id="search-input" type="text" placeholder="Cari lagu atau artis..."
                             class="input-field pl-10 pr-4 py-2.5 text-sm rounded-full" autocomplete="off">
                     </div>
@@ -258,14 +879,16 @@
                 <div class="px-6 pt-2 pb-1">
                     <div class="flex items-center justify-between mb-2">
                         <p id="track-count" class="text-sm v-text2"></p>
-                        <button data-action="load-tracks" class="ctrl-btn text-sm"><i class="fa-solid fa-rotate"></i></button>
+                        <button data-action="load-tracks" class="ctrl-btn text-sm"><i
+                                class="fa-solid fa-rotate"></i></button>
                     </div>
                 </div>
                 <div class="px-6">
                     <div class="track-row text-xs font-semibold uppercase tracking-wider mb-1 track-header">
                         <span class="text-center">#</span><span></span><span>Judul</span>
                         <span class="track-artist-col">Artis</span>
-                        <span class="track-duration-col text-right"><i class="fa-regular fa-clock"></i></span><span></span>
+                        <span class="track-duration-col text-right"><i
+                                class="fa-regular fa-clock"></i></span><span></span>
                     </div>
                     <div class="border-t v-border-t mb-2"></div>
                 </div>
@@ -274,14 +897,15 @@
         </div>
 
         <!-- ═══════ Player Bar ═══════ -->
-        <footer id="player-bar" class="relative flex-shrink-0 player-bar-base">
+        <footer id="player-bar" class="relative flex-shrink-0 player-bar-base player-safe-bottom">
             <div id="progress-bar" class="progress-container absolute -top-1 left-0 right-0" style="z-index: 5;">
                 <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
             </div>
             <div class="flex items-center h-full px-4 pt-2 pb-1 gap-4" style="min-height: 88px;">
                 <div class="flex items-center gap-3 w-1/4 min-w-0">
                     <img id="player-thumb" class="player-thumb"
-                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324282f' width='56' height='56' rx='8'/%3E%3C/svg%3E" alt="Sedang diputar">
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324282f' width='56' height='56' rx='8'/%3E%3C/svg%3E"
+                        alt="Sedang diputar">
                     <div class="min-w-0">
                         <p id="player-title" class="text-sm font-semibold truncate">Tidak ada lagu</p>
                         <p id="player-artist" class="text-xs truncate v-text2">—</p>
@@ -289,11 +913,16 @@
                 </div>
                 <div class="flex-1 flex flex-col items-center gap-1 max-w-xl mx-auto">
                     <div class="flex items-center gap-2">
-                        <button id="btn-shuffle" class="ctrl-btn ctrl-btn-lg" data-action="toggle-shuffle"><i class="fa-solid fa-shuffle text-sm"></i></button>
-                        <button class="ctrl-btn ctrl-btn-lg" data-action="prev"><i class="fa-solid fa-backward-step text-lg"></i></button>
-                        <button id="btn-play" class="ctrl-btn ctrl-btn-play" data-action="toggle-play"><i class="fa-solid fa-play" id="play-icon"></i></button>
-                        <button class="ctrl-btn ctrl-btn-lg" data-action="next"><i class="fa-solid fa-forward-step text-lg"></i></button>
-                        <button id="btn-repeat" class="ctrl-btn ctrl-btn-lg" data-action="toggle-repeat"><i class="fa-solid fa-repeat text-sm" id="repeat-icon"></i></button>
+                        <button id="btn-shuffle" class="ctrl-btn ctrl-btn-lg" data-action="toggle-shuffle"><i
+                                class="fa-solid fa-shuffle text-sm"></i></button>
+                        <button class="ctrl-btn ctrl-btn-lg" data-action="prev"><i
+                                class="fa-solid fa-backward-step text-lg"></i></button>
+                        <button id="btn-play" class="ctrl-btn ctrl-btn-play" data-action="toggle-play"><i
+                                class="fa-solid fa-play" id="play-icon"></i></button>
+                        <button class="ctrl-btn ctrl-btn-lg" data-action="next"><i
+                                class="fa-solid fa-forward-step text-lg"></i></button>
+                        <button id="btn-repeat" class="ctrl-btn ctrl-btn-lg" data-action="toggle-repeat"><i
+                                class="fa-solid fa-repeat text-sm" id="repeat-icon"></i></button>
                     </div>
                     <div class="flex items-center gap-3 w-full text-xs v-text2">
                         <span id="time-current" class="w-10 text-right tabular-nums">0:00</span>
@@ -304,8 +933,11 @@
                     </div>
                 </div>
                 <div class="hidden sm:flex items-center gap-3 w-1/4 justify-end">
-                    <button id="btn-volume" class="ctrl-btn" data-action="toggle-mute"><i class="fa-solid fa-volume-high text-sm" id="volume-icon"></i></button>
-                    <div id="volume-bar" class="volume-container"><div id="volume-fill" class="volume-fill" style="width: 80%;"></div></div>
+                    <button id="btn-volume" class="ctrl-btn" data-action="toggle-mute"><i
+                            class="fa-solid fa-volume-high text-sm" id="volume-icon"></i></button>
+                    <div id="volume-bar" class="volume-container">
+                        <div id="volume-fill" class="volume-fill" style="width: 80%;"></div>
+                    </div>
                 </div>
             </div>
         </footer>
@@ -316,15 +948,33 @@
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl">Tambah Lagu</h2>
-                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-add-track"><i class="fa-solid fa-xmark"></i></button>
+                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-add-track"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
-                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">URL YouTube</label><input id="input-url" type="url" placeholder="https://youtube.com/watch?v=..." class="input-field" autocomplete="off"></div>
-                <div id="url-preview" class="hidden rounded-xl overflow-hidden v-err-border"><div class="flex items-center gap-3 p-3"><img id="preview-thumb" class="preview-thumb" src="" alt="Pratinjau"><div class="flex-1 min-w-0"><p id="preview-status" class="text-xs v-muted">Mengambil info...</p></div></div></div>
-                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Judul</label><input id="input-title" type="text" placeholder="Judul lagu" class="input-field" autocomplete="off"></div>
-                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Artis</label><input id="input-artist" type="text" placeholder="Nama artis" class="input-field" autocomplete="off"></div>
+                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">URL
+                        YouTube</label><input id="input-url" type="url" placeholder="https://youtube.com/watch?v=..."
+                        class="input-field" autocomplete="off"></div>
+                <div id="url-preview" class="hidden rounded-xl overflow-hidden v-err-border">
+                    <div class="flex items-center gap-3 p-3"><img id="preview-thumb" class="preview-thumb" src=""
+                            alt="Pratinjau">
+                        <div class="flex-1 min-w-0">
+                            <p id="preview-status" class="text-xs v-muted">Mengambil info...</p>
+                        </div>
+                    </div>
+                </div>
+                <div><label
+                        class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Judul</label><input
+                        id="input-title" type="text" placeholder="Judul lagu" class="input-field" autocomplete="off">
+                </div>
+                <div><label
+                        class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Artis</label><input
+                        id="input-artist" type="text" placeholder="Nama artis" class="input-field" autocomplete="off">
+                </div>
                 <div id="modal-error-add" class="hidden text-sm rounded-lg p-3 v-err"></div>
-                <button id="btn-submit-track" data-action="submit-track" class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Tambahkan ke Daftar</button>
+                <button id="btn-submit-track" data-action="submit-track"
+                    class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Tambahkan ke
+                    Daftar</button>
             </div>
         </div>
     </div>
@@ -334,12 +984,16 @@
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl">Buat Playlist Baru</h2>
-                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-create-pl"><i class="fa-solid fa-xmark"></i></button>
+                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-create-pl"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-4">
-                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Nama Playlist</label><input id="input-pl-name" type="text" placeholder="Contoh: Sad Vibes" class="input-field" autocomplete="off"></div>
+                <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Nama
+                        Playlist</label><input id="input-pl-name" type="text" placeholder="Contoh: Sad Vibes"
+                        class="input-field" autocomplete="off"></div>
                 <div id="modal-error-pl" class="hidden text-sm rounded-lg p-3 v-err"></div>
-                <button id="btn-create-pl" data-action="create-playlist" class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Buat Playlist</button>
+                <button id="btn-create-pl" data-action="create-playlist"
+                    class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn mt-2">Buat Playlist</button>
             </div>
         </div>
     </div>
@@ -349,16 +1003,22 @@
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="font-display font-bold text-xl">Masukkan ke Playlist</h2>
-                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-move-track"><i class="fa-solid fa-xmark"></i></button>
+                <button class="ctrl-btn text-lg" data-action="close-modal" data-modal="modal-move-track"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
             <div id="move-track-playlists" class="space-y-2 max-h-60 overflow-y-auto"></div>
-            <div class="mt-6"><button id="btn-save-move" data-action="save-move" class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn">Simpan Perubahan</button></div>
+            <div class="mt-6"><button id="btn-save-move" data-action="save-move"
+                    class="w-full py-3 rounded-xl font-display font-semibold text-sm v-btn">Simpan Perubahan</button>
+            </div>
         </div>
     </div>
 
     <div id="toasts" class="fixed top-4 right-4 z-50 space-y-3" style="pointer-events: none;"></div>
 
-    <div id="yt-container" style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden;"><div id="yt-player"></div></div>
+    <div id="yt-container"
+        style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
+        <div id="yt-player"></div>
+    </div>
 
     <script>
         const TT = (function () {
