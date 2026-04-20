@@ -1,0 +1,1443 @@
+<!--
+  ============================================================
+  GOOGLE APPS SCRIPT — Deploy as Web App (Execute As: You, Access: Anyone)
+  ============================================================
+  const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+  const SHEET_NAME = 'Pages';
+
+  function doGet(e) {
+    const action = e.parameter.action;
+    if (action === 'fetchAll') {
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+      if (!ss) return jsonResp({ pages: [] });
+      const data = ss.getDataRange().getValues();
+      if (data.length <= 1) return jsonResp({ pages: [] });
+      const headers = data[0];
+      const pages = data.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = row[i]);
+        if (typeof obj.blocks === 'string') {
+          try { obj.blocks = JSON.parse(obj.blocks); } catch(e) { obj.blocks = []; }
+        }
+        return obj;
+      });
+      return jsonResp({ pages });
+    }
+    return jsonResp({ error: 'Invalid action' });
+  }
+
+  function doPost(e) {
+    const data = JSON.parse(e.postData.contents);
+    if (data.action === 'save') {
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+      if (!ss) { ss = SpreadsheetApp.openById(SPREADSHEET_ID).insertSheet(SHEET_NAME);
+        ss.appendRow(['id','title','blocks','createdAt','updatedAt']); }
+      const idx = findRow(ss, data.id);
+      const row = [data.id, data.title, JSON.stringify(data.blocks), data.createdAt, data.updatedAt];
+      if (idx > -1) ss.getRange(idx + 2, 1, 1, row.length).setValues([row]);
+      else ss.appendRow(row);
+      return jsonResp({ success: true });
+    }
+    if (data.action === 'delete') {
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME);
+      if (ss) { const idx = findRow(ss, data.id); if (idx > -1) ss.deleteRow(idx + 2); }
+      return jsonResp({ success: true });
+    }
+    return jsonResp({ error: 'Invalid action' });
+  }
+
+  function findRow(sheet, id) {
+    const vals = sheet.getRange(2, 1, Math.max(1, sheet.getLastRow() - 1), 1).getValues().flat();
+    return vals.indexOf(id);
+  }
+
+  function jsonResp(obj) {
+    return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  }
+  ============================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotionLite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['selector', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"DM Sans"', 'sans-serif'] },
+                    colors: {
+                        th: {
+                            bg: 'var(--bg-primary)', bg2: 'var(--bg-secondary)', bg3: 'var(--bg-tertiary)',
+                            tx: 'var(--text-primary)', tx2: 'var(--text-secondary)', tx3: 'var(--text-tertiary)',
+                            ac: 'var(--accent)', ach: 'var(--accent-hover)', acl: 'var(--accent-light)',
+                            bd: 'var(--border)', dn: 'var(--danger)', ok: 'var(--success)',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #FAF9F7;
+            --bg-secondary: #F3F1EC;
+            --bg-tertiary: #EBE8E2;
+            --text-primary: #1A1816;
+            --text-secondary: #6B6560;
+            --text-tertiary: #A09A94;
+            --accent: #C4680A;
+            --accent-hover: #A5570A;
+            --accent-light: #FEF5EC;
+            --border: #E2DFD9;
+            --danger: #C43030;
+            --success: #2D8B4E;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #16161A;
+            --bg-secondary: #1E1E23;
+            --bg-tertiary: #28272E;
+            --text-primary: #F0EDE8;
+            --text-secondary: #9B9690;
+            --text-tertiary: #6B6660;
+            --accent: #E88A10;
+            --accent-hover: #F09A24;
+            --accent-light: #3A2510;
+            --border: #35333A;
+            --danger: #E04545;
+            --success: #34A85B;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        ::selection {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        /* Block editor */
+        .block-content {
+            outline: none;
+            padding: 3px 2px;
+            min-height: 1.5em;
+            line-height: 1.65;
+            word-break: break-word;
+        }
+
+        .block-content.empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-tertiary);
+            pointer-events: none;
+        }
+
+        [data-bt="h1"] .block-content {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.25;
+            padding-top: 0.75rem;
+        }
+
+        [data-bt="h2"] .block-content {
+            font-size: 1.375rem;
+            font-weight: 600;
+            line-height: 1.3;
+            padding-top: 0.5rem;
+        }
+
+        [data-bt="h3"] .block-content {
+            font-size: 1.125rem;
+            font-weight: 600;
+            line-height: 1.4;
+            padding-top: 0.35rem;
+        }
+
+        [data-bt="bullet"] .b-prefix::before {
+            content: '•';
+            font-size: 1.1em;
+        }
+
+        [data-bt="numbered"] .b-prefix {
+            font-variant-numeric: tabular-nums;
+            font-size: 0.875rem;
+        }
+
+        .b-handle {
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .bw:hover .b-handle {
+            opacity: 0.5;
+        }
+
+        .bw:hover .b-handle:hover {
+            opacity: 1;
+        }
+
+        .page-title-content {
+            outline: none;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .page-title-content.empty::before {
+            content: 'Untitled';
+            color: var(--text-tertiary);
+        }
+
+        /* Slash menu */
+        .slash-menu {
+            animation: slashIn 0.12s ease-out;
+        }
+
+        @keyframes slashIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slash-item.active {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        /* Format toolbar */
+        .fmt-toolbar {
+            animation: fmtIn 0.1s ease-out;
+        }
+
+        @keyframes fmtIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            animation: toastIn 0.3s ease-out;
+        }
+
+        .toast.out {
+            animation: toastOut 0.25s ease-in forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes toastOut {
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        /* Modal */
+        .modal-bg {
+            animation: fadeIn 0.15s ease-out;
+        }
+
+        .modal-box {
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Sync pulse */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .sync-saving .sync-dot {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* Search highlight */
+        mark {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 2px;
+            padding: 0 1px;
+        }
+
+        /* Focus ring */
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        /* Divider delete button */
+        .divider-del {
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .bw:hover .divider-del {
+            opacity: 1;
+        }
+
+        /* Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans overflow-hidden h-screen">
+
+    <div class="flex h-screen">
+        <!-- Mobile overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden" aria-hidden="true"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="fixed inset-y-0 left-0 z-40 w-72 shrink-0 bg-th-bg2 border-r border-th-bd flex flex-col -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out"
+            role="navigation" aria-label="Page navigation">
+            <div class="p-4 border-b border-th-bd flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                        style="background:var(--accent)">N</div>
+                    <span class="font-semibold text-th-tx tracking-tight">NotionLite</span>
+                </div>
+                <button id="themeToggle"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-th-tx2 hover:bg-th-bg3 transition-colors"
+                    aria-label="Toggle theme">
+                    <i class="fa-regular fa-moon text-sm"></i>
+                </button>
+            </div>
+            <div class="p-3">
+                <div class="relative">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-th-tx3 text-xs"></i>
+                    <input id="searchInput" type="text" placeholder="Search pages..."
+                        class="w-full pl-8 pr-14 py-2 text-sm rounded-lg bg-th-bg3 border border-transparent focus:border-th-ac outline-none text-th-tx placeholder-th-tx3 transition-colors"
+                        aria-label="Search pages">
+                    <kbd
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-th-tx3 bg-th-bg2 border border-th-bd rounded px-1.5 py-0.5 hidden sm:inline pointer-events-none">⌘K</kbd>
+                </div>
+            </div>
+            <div class="px-3 pb-2">
+                <button id="newPageBtn"
+                    class="w-full py-2 text-sm rounded-lg border border-dashed border-th-bd text-th-tx2 hover:border-th-ac hover:text-th-ac transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus text-xs"></i> New Page
+                </button>
+            </div>
+            <div id="pageList" class="flex-1 overflow-y-auto px-2 py-1" role="list" aria-label="Pages"></div>
+            <div class="p-3 border-t border-th-bd">
+                <button id="exportBtn"
+                    class="w-full py-2 text-sm rounded-lg text-th-tx2 hover:bg-th-bg3 transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-arrow-down text-xs"></i> Export Markdown
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div class="h-12 flex items-center justify-between px-4 border-b border-th-bd shrink-0 bg-th-bg">
+                <button id="menuToggle"
+                    class="md:hidden w-8 h-8 rounded-lg flex items-center justify-center text-th-tx2 hover:bg-th-bg3 transition-colors"
+                    aria-label="Toggle sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="flex-1"></div>
+                <div id="syncStatus" class="flex items-center gap-1.5 text-xs text-th-tx3" aria-live="polite">
+                    <span class="sync-dot w-1.5 h-1.5 rounded-full bg-th-ok inline-block"></span>
+                    <span class="sync-text">Saved</span>
+                </div>
+            </div>
+            <div id="editorContent" class="flex-1 overflow-y-auto bg-th-bg"></div>
+        </main>
+    </div>
+
+    <!-- Slash menu -->
+    <div id="slashMenu" class="fixed z-50 hidden slash-menu" role="menu" aria-label="Block type"></div>
+
+    <!-- Format toolbar -->
+    <div id="formatToolbar" class="fixed z-50 hidden fmt-toolbar" role="toolbar" aria-label="Text formatting"></div>
+
+    <!-- Delete modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center" role="dialog"
+        aria-modal="true" aria-label="Confirm deletion">
+        <div class="modal-bg absolute inset-0 bg-black/40" id="deleteModalBg"></div>
+        <div class="modal-box relative rounded-xl shadow-2xl p-6 w-full max-w-sm mx-4 border border-th-bd"
+            style="background:var(--bg-secondary)">
+            <h3 class="text-lg font-semibold mb-2" style="color:var(--text-primary)">Delete Page</h3>
+            <p class="text-sm mb-6" style="color:var(--text-secondary)">This action cannot be undone. All content will
+                be permanently removed.</p>
+            <div class="flex gap-3 justify-end">
+                <button id="cancelDeleteBtn" class="px-4 py-2 text-sm rounded-lg transition-colors"
+                    style="color:var(--text-secondary)" onmouseover="this.style.background='var(--bg-tertiary)'"
+                    onmouseout="this.style.background='transparent'">Cancel</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 text-sm rounded-lg text-white transition-colors"
+                    style="background:var(--danger)" onmouseover="this.style.opacity='0.9'"
+                    onmouseout="this.style.opacity='1'">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        'use strict';
+
+        // ==========================================
+        // CONFIG
+        // ==========================================
+        const CONFIG = {
+            APPS_SCRIPT_URL: '',       // Paste your deployed Web App URL here
+            DEBOUNCE_MS: 1500,
+            SEARCH_DEBOUNCE_MS: 180,
+            STORAGE_KEY: 'notionlite_data',
+            THEME_KEY: 'notionlite_theme',
+        };
+
+        const BLOCK_TYPES = [
+            { type: 'paragraph', label: 'Paragraph', icon: 'fa-solid fa-paragraph', desc: 'Plain text' },
+            { type: 'h1', label: 'Heading 1', icon: 'fa-solid fa-heading', desc: 'Large section' },
+            { type: 'h2', label: 'Heading 2', icon: 'fa-solid fa-heading', desc: 'Medium section' },
+            { type: 'h3', label: 'Heading 3', icon: 'fa-solid fa-heading', desc: 'Small section' },
+            { type: 'bullet', label: 'Bullet List', icon: 'fa-solid fa-list-ul', desc: 'Unordered list' },
+            { type: 'numbered', label: 'Numbered List', icon: 'fa-solid fa-list-ol', desc: 'Ordered list' },
+            { type: 'divider', label: 'Divider', icon: 'fa-solid fa-minus', desc: 'Horizontal line' },
+        ];
+
+        const FORMAT_OPTS = [
+            { cmd: 'bold', label: 'Bold', icon: 'fa-solid fa-bold' },
+            { cmd: 'italic', label: 'Italic', icon: 'fa-solid fa-italic' },
+            { cmd: 'underline', label: 'Underline', icon: 'fa-solid fa-underline' },
+        ];
+
+        // ==========================================
+        // UTILITIES
+        // ==========================================
+        const U = {
+            uuid: () => crypto.randomUUID ? crypto.randomUUID() : 'xxxx-xxxx-xxxx'.replace(/x/g, () => ((Math.random() * 16) | 0).toString(16)),
+            debounce: (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; },
+            escHtml: s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; },
+            escRegex: s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+            plainText: html => { const d = document.createElement('div'); d.innerHTML = html; return d.textContent || ''; },
+            htmlToMd: html => html
+                .replace(/<b>(.*?)<\/b>/gi, '**$1**').replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
+                .replace(/<i>(.*?)<\/i>/gi, '*$1*').replace(/<em>(.*?)<\/em>/gi, '*$1*')
+                .replace(/<u>(.*?)<\/u>/gi, '__$1__')
+                .replace(/<br\s*\/?>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<div>/gi, '')
+                .replace(/<[^>]+>/g, '').replace(/\n{3,}/g, '\n\n').trim(),
+            timeAgo: ts => {
+                const s = Math.floor((Date.now() - ts) / 1000);
+                if (s < 60) return 'Just now';
+                if (s < 3600) return Math.floor(s / 60) + 'm ago';
+                if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+                return Math.floor(s / 86400) + 'd ago';
+            },
+        };
+
+        // ==========================================
+        // STATE
+        // ==========================================
+        const state = {
+            pages: [],
+            activePageId: null,
+            syncStatus: 'saved', // saved | saving | error
+            searchQuery: '',
+            slashMenu: { visible: false, blockId: null, filter: '', index: 0 },
+            fmtVisible: false,
+            deleteTargetId: null,
+        };
+
+        function getActivePage() {
+            return state.pages.find(p => p.id === state.activePageId) || null;
+        }
+
+        // ==========================================
+        // STORAGE
+        // ==========================================
+        const Storage = {
+            load() {
+                try {
+                    const raw = localStorage.getItem(CONFIG.STORAGE_KEY);
+                    if (!raw) return null;
+                    const d = JSON.parse(raw);
+                    if (d && Array.isArray(d.pages)) return d;
+                } catch (e) { /* corrupted */ }
+                return null;
+            },
+            save() {
+                try {
+                    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({ pages: state.pages, activePageId: state.activePageId }));
+                } catch (e) { /* quota */ }
+            },
+        };
+
+        // ==========================================
+        // API
+        // ==========================================
+        const API = {
+            configured: () => !!CONFIG.APPS_SCRIPT_URL,
+            async fetchAll() {
+                if (!this.configured()) return null;
+                const res = await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=fetchAll`);
+                if (!res.ok) throw new Error('Network error');
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                return data.pages || [];
+            },
+            async savePage(page) {
+                if (!this.configured()) return;
+                await fetch(CONFIG.APPS_SCRIPT_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'save', ...page }),
+                });
+            },
+            async deletePage(id) {
+                if (!this.configured()) return;
+                await fetch(CONFIG.APPS_SCRIPT_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'delete', id }),
+                });
+            },
+        };
+
+        // ==========================================
+        // TOAST
+        // ==========================================
+        const Toast = {
+            show(msg, type = 'info') {
+                const el = document.createElement('div');
+                const bg = type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--success)' : 'var(--accent)';
+                el.className = 'toast pointer-events-auto';
+                el.style.cssText = `background:${bg};color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.2);max-width:320px;`;
+                el.textContent = msg;
+                document.getElementById('toastContainer').appendChild(el);
+                setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 3000);
+            },
+        };
+
+        // ==========================================
+        // THEME
+        // ==========================================
+        const Theme = {
+            init() {
+                const saved = localStorage.getItem(CONFIG.THEME_KEY);
+                const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.apply(saved || (preferDark ? 'dark' : 'light'));
+            },
+            toggle() {
+                const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+                this.apply(next);
+                localStorage.setItem(CONFIG.THEME_KEY, next);
+            },
+            apply(t) {
+                document.documentElement.dataset.theme = t;
+                const icon = document.querySelector('#themeToggle i');
+                icon.className = t === 'dark' ? 'fa-regular fa-sun text-sm' : 'fa-regular fa-moon text-sm';
+            },
+        };
+
+        // ==========================================
+        // SYNC
+        // ==========================================
+        let _debouncedApiSave = null;
+
+        function setSyncStatus(s) {
+            state.syncStatus = s;
+            const el = document.getElementById('syncStatus');
+            const dot = el.querySelector('.sync-dot');
+            const txt = el.querySelector('.sync-text');
+            el.classList.remove('sync-saving');
+            if (s === 'saved') { dot.style.background = 'var(--success)'; txt.textContent = 'Saved'; }
+            else if (s === 'saving') { dot.style.background = 'var(--accent)'; txt.textContent = 'Saving...'; el.classList.add('sync-saving'); }
+            else if (s === 'error') { dot.style.background = 'var(--danger)'; txt.textContent = 'Sync Error'; }
+        }
+
+        function fullSave() {
+            Storage.save();
+            if (!API.configured()) return;
+            setSyncStatus('saving');
+            const page = getActivePage();
+            if (page) {
+                API.savePage(page).then(() => setSyncStatus('saved')).catch(() => setSyncStatus('error'));
+            } else {
+                setSyncStatus('saved');
+            }
+        }
+
+        function initDebouncedSave() {
+            _debouncedApiSave = U.debounce(fullSave, CONFIG.DEBOUNCE_MS);
+        }
+
+        function triggerSave() {
+            Storage.save();
+            _debouncedApiSave();
+        }
+
+        async function loadFromBackend() {
+            if (!API.configured()) return;
+            try {
+                const pages = await API.fetchAll();
+                if (pages && pages.length > 0) {
+                    // Merge with localStorage (last-write-wins per page)
+                    const local = Storage.load();
+                    const localMap = new Map((local?.pages || []).map(p => [p.id, p]));
+                    const merged = pages.map(remote => {
+                        const local = localMap.get(remote.id);
+                        if (local && local.updatedAt > remote.updatedAt) return local;
+                        return remote;
+                    });
+                    // Keep local pages not yet synced
+                    (local?.pages || []).forEach(lp => {
+                        if (!merged.find(m => m.id === lp.id)) merged.push(lp);
+                    });
+                    state.pages = merged;
+                    Storage.save();
+                }
+            } catch (e) { /* silent — localStorage is fallback */ }
+        }
+
+        function forceSync() {
+            fullSave();
+            Toast.show('Syncing...', 'info');
+        }
+
+        // ==========================================
+        // SIDEBAR
+        // ==========================================
+        const sidebarEl = document.getElementById('sidebar');
+        const overlayEl = document.getElementById('sidebarOverlay');
+
+        function openSidebar() { sidebarEl.classList.remove('-translate-x-full'); overlayEl.classList.remove('hidden'); }
+        function closeSidebar() { sidebarEl.classList.add('-translate-x-full'); overlayEl.classList.add('hidden'); }
+        function toggleSidebar() { sidebarEl.classList.contains('-translate-x-full') ? openSidebar() : closeSidebar(); }
+
+        function renderPageList() {
+            const el = document.getElementById('pageList');
+            const q = state.searchQuery.toLowerCase().trim();
+            let filtered = state.pages;
+            if (q) {
+                filtered = state.pages.filter(p => {
+                    if (p.title.toLowerCase().includes(q)) return true;
+                    return p.blocks.some(b => U.plainText(b.content).toLowerCase().includes(q));
+                });
+            }
+            if (filtered.length === 0) {
+                el.innerHTML = `<div class="text-center py-10 text-sm" style="color:var(--text-tertiary)">${q ? 'No pages match your search' : 'No pages yet. Create one!'}</div>`;
+                return;
+            }
+            el.innerHTML = filtered.map((p, i) => {
+                const active = p.id === state.activePageId;
+                const titleHtml = q ? highlightText(p.title || 'Untitled', q) : U.escHtml(p.title || 'Untitled');
+                const bg = active ? 'background:var(--accent-light)' : '';
+                const txColor = active ? 'color:var(--accent)' : '';
+                return `<div class="group flex items-center gap-1 px-2.5 py-2 rounded-lg cursor-pointer transition-colors hover:bg-th-bg3" data-page-id="${p.id}" role="listitem" tabindex="0" style="${bg}" aria-label="${U.escHtml(p.title || 'Untitled')}">
+      <i class="fa-regular fa-file-lines text-xs shrink-0" style="color:${active ? 'var(--accent)' : 'var(--text-tertiary)'}"></i>
+      <div class="flex-1 min-w-0 ml-1.5">
+        <div class="text-sm font-medium truncate" style="${txColor}">${titleHtml}</div>
+        <div class="text-[11px]" style="color:var(--text-tertiary)">${U.timeAgo(p.updatedAt)}</div>
+      </div>
+      <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button class="pg-move-up w-5 h-5 rounded flex items-center justify-center hover:bg-th-bg3 transition-colors" style="color:var(--text-tertiary)" aria-label="Move up" title="Move up" ${i === 0 ? 'disabled style="opacity:0.3;pointer-events:none;color:var(--text-tertiary)"' : ''}><i class="fa-solid fa-chevron-up" style="font-size:9px"></i></button>
+        <button class="pg-move-down w-5 h-5 rounded flex items-center justify-center hover:bg-th-bg3 transition-colors" style="color:var(--text-tertiary)" aria-label="Move down" title="Move down" ${i === filtered.length - 1 ? 'disabled style="opacity:0.3;pointer-events:none;color:var(--text-tertiary)"' : ''}><i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>
+        <button class="pg-del w-5 h-5 rounded flex items-center justify-center hover:bg-th-bg3 transition-colors" style="color:var(--text-tertiary)" aria-label="Delete" title="Delete page"><i class="fa-regular fa-trash-can" style="font-size:9px"></i></button>
+      </div>
+    </div>`;
+            }).join('');
+        }
+
+        function highlightText(text, query) {
+            const escaped = U.escHtml(text);
+            if (!query) return escaped;
+            const regex = new RegExp(`(${U.escRegex(query)})`, 'gi');
+            return escaped.replace(regex, '<mark>$1</mark>');
+        }
+
+        // ==========================================
+        // EDITOR
+        // ==========================================
+        const editorEl = document.getElementById('editorContent');
+
+        function renderEditor() {
+            const page = getActivePage();
+            if (!page) {
+                editorEl.innerHTML = `<div class="flex flex-col items-center justify-center h-full gap-3" style="color:var(--text-tertiary)">
+      <i class="fa-regular fa-file-lines text-4xl mb-2" style="opacity:0.4"></i>
+      <p class="text-sm">Select a page or create a new one</p>
+    </div>`;
+                return;
+            }
+            editorEl.innerHTML = `<div class="max-w-2xl mx-auto px-6 py-8 md:px-12">
+    <div class="mb-1">
+      <div class="page-title-content${!page.title.trim() ? ' empty' : ''}" contenteditable="true" id="pageTitle" role="textbox" aria-label="Page title" data-placeholder="Untitled">${page.title}</div>
+    </div>
+    <div id="blocksContainer" class="mt-4 flex flex-col gap-0.5"></div>
+    <div class="mt-6 text-xs flex items-center gap-1.5" style="color:var(--text-tertiary);opacity:0.6">
+      <i class="fa-solid fa-circle-info" style="font-size:10px"></i>
+      Type / for commands &middot; Select text to format
+    </div>
+  </div>`;
+            renderBlocks();
+            // Focus title if empty
+            if (!page.title.trim()) {
+                const titleEl = document.getElementById('pageTitle');
+                if (titleEl) titleEl.focus();
+            }
+        }
+
+        function renderBlocks() {
+            const page = getActivePage();
+            const container = document.getElementById('blocksContainer');
+            if (!page || !container) return;
+            container.innerHTML = page.blocks.map((block, i) => renderBlockHtml(block, i, page.blocks)).join('');
+        }
+
+        function renderBlockHtml(block, index, allBlocks) {
+            if (block.type === 'divider') {
+                return `<div class="bw flex items-center gap-0" data-block-id="${block.id}" data-bt="divider">
+      <div class="b-handle w-6 text-center pt-0.5 shrink-0" style="color:var(--text-tertiary);font-size:11px"><i class="fa-solid fa-grip-vertical"></i></div>
+      <div class="flex-1 relative py-2"><hr style="border:none;border-top:1px solid var(--border)">
+        <button class="divider-del absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center" style="color:var(--text-tertiary);background:var(--bg-tertiary)" data-divider-del="${block.id}" aria-label="Remove divider"><i class="fa-solid fa-xmark" style="font-size:9px"></i></button>
+      </div>
+    </div>`;
+            }
+            const isEmpty = !U.plainText(block.content).trim();
+            const prefix = block.type === 'numbered'
+                ? `<span class="b-prefix w-6 text-center pt-1 shrink-0" style="color:var(--text-secondary)">${getNumberedIndex(allBlocks, index)}.</span>`
+                : block.type === 'bullet'
+                    ? `<span class="b-prefix w-6 text-center pt-1 shrink-0" style="color:var(--text-secondary)"></span>`
+                    : `<span class="b-prefix w-6 shrink-0"></span>`;
+            const placeholder = isEmpty ? 'Type / for commands' : '';
+            return `<div class="bw flex items-start" data-block-id="${block.id}" data-bt="${block.type}">
+    <div class="b-handle w-6 text-center pt-1 shrink-0" style="color:var(--text-tertiary);font-size:11px"><i class="fa-solid fa-grip-vertical"></i></div>
+    ${prefix}
+    <div class="block-content flex-1${isEmpty ? ' empty' : ''}" contenteditable="true" role="textbox" aria-multiline="true" aria-label="${block.type} block" data-placeholder="${placeholder}">${block.content}</div>
+  </div>`;
+        }
+
+        function getNumberedIndex(blocks, idx) {
+            let n = 1;
+            for (let i = idx - 1; i >= 0; i--) {
+                if (blocks[i].type === 'numbered') n++;
+                else break;
+            }
+            return n;
+        }
+
+        function updateBlockInState(blockId, html) {
+            const page = getActivePage();
+            if (!page) return;
+            const block = page.blocks.find(b => b.id === blockId);
+            if (!block) return;
+            block.content = html;
+            page.updatedAt = Date.now();
+            triggerSave();
+        }
+
+        function updateTitleInState(title) {
+            const page = getActivePage();
+            if (!page) return;
+            page.title = title;
+            page.updatedAt = Date.now();
+            renderPageList();
+            triggerSave();
+        }
+
+        // ==========================================
+        // BLOCK OPERATIONS
+        // ==========================================
+        function createBlock(afterBlockId, type, content) {
+            const page = getActivePage();
+            if (!page) return;
+            const afterIdx = page.blocks.findIndex(b => b.id === afterBlockId);
+            if (afterIdx === -1) return;
+            const newBlock = { id: U.uuid(), type, content: content || '', order: afterIdx + 1 };
+            page.blocks.splice(afterIdx + 1, 0, newBlock);
+            page.updatedAt = Date.now();
+            renderBlocks();
+            triggerSave();
+            // Focus new block
+            requestAnimationFrame(() => focusBlock(newBlock.id, content ? 'end' : 'start'));
+        }
+
+        function deleteBlock(blockId) {
+            const page = getActivePage();
+            if (!page) return;
+            const idx = page.blocks.findIndex(b => b.id === blockId);
+            if (idx === -1) return;
+            if (page.blocks.length <= 1) return; // Keep at least one block
+            page.blocks.splice(idx, 1);
+            page.updatedAt = Date.now();
+            // Focus previous or next
+            const focusIdx = Math.min(idx, page.blocks.length - 1);
+            renderBlocks();
+            triggerSave();
+            requestAnimationFrame(() => focusBlock(page.blocks[focusIdx].id, 'end'));
+        }
+
+        function changeBlockType(blockId, newType) {
+            const page = getActivePage();
+            if (!page) return;
+            const block = page.blocks.find(b => b.id === blockId);
+            if (!block) return;
+            block.type = newType;
+            if (newType === 'divider') block.content = '';
+            page.updatedAt = Date.now();
+            renderBlocks();
+            triggerSave();
+            if (newType !== 'divider') {
+                requestAnimationFrame(() => focusBlock(blockId, 'end'));
+            }
+        }
+
+        function focusBlock(blockId, pos) {
+            const el = document.querySelector(`[data-block-id="${blockId}"] [contenteditable]`);
+            if (!el) return;
+            el.focus();
+            if (pos === 'end') {
+                const sel = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+
+        function splitBlockAtCursor(blockId) {
+            try {
+                const el = document.querySelector(`[data-block-id="${blockId}"] [contenteditable]`);
+                if (!el) return '';
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return '';
+                const range = sel.getRangeAt(0);
+                // Ensure range is within this block
+                if (!el.contains(range.startContainer)) return '';
+                const afterRange = document.createRange();
+                afterRange.selectNodeContents(el);
+                afterRange.setStart(range.endContainer, range.endOffset);
+                if (afterRange.collapsed) return '';
+                const frag = afterRange.extractContents();
+                const tmp = document.createElement('div');
+                tmp.appendChild(frag);
+                // Update empty state
+                el.classList.toggle('empty', !el.textContent.trim());
+                return tmp.innerHTML;
+            } catch (e) { return ''; }
+        }
+
+        // ==========================================
+        // SLASH MENU
+        // ==========================================
+        const slashEl = document.getElementById('slashMenu');
+
+        function showSlashMenu(blockId, filter) {
+            const items = BLOCK_TYPES.filter(b => !filter || b.label.toLowerCase().includes(filter) || b.type.includes(filter));
+            if (items.length === 0) { hideSlashMenu(); return; }
+            state.slashMenu = { visible: true, blockId, filter, index: Math.min(state.slashMenu.index, items.length - 1) };
+            slashEl.innerHTML = `<div class="rounded-xl shadow-xl border overflow-hidden py-1" style="background:var(--bg-secondary);border-color:var(--border);min-width:220px;max-height:280px;overflow-y:auto">
+    ${items.map((b, i) => `<div class="slash-item flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors${i === state.slashMenu.index ? ' active' : ''}" data-slash-type="${b.type}" data-slash-idx="${i}" role="menuitem">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:var(--bg-tertiary);color:var(--text-secondary)"><i class="${b.icon}" style="font-size:12px"></i></div>
+      <div><div class="text-sm font-medium" style="color:var(--text-primary)">${b.label}</div><div class="text-[11px]" style="color:var(--text-tertiary)">${b.desc}</div></div>
+    </div>`).join('')}
+  </div>`;
+            slashEl.classList.remove('hidden');
+            // Position below block
+            const blockEl = document.querySelector(`[data-block-id="${blockId}"]`);
+            if (blockEl) {
+                const r = blockEl.getBoundingClientRect();
+                let top = r.bottom + 4;
+                let left = r.left + 30;
+                if (top + 280 > window.innerHeight) top = r.top - 280;
+                if (left + 220 > window.innerWidth) left = window.innerWidth - 230;
+                slashEl.style.top = top + 'px';
+                slashEl.style.left = Math.max(8, left) + 'px';
+            }
+        }
+
+        function hideSlashMenu() {
+            state.slashMenu.visible = false;
+            slashEl.classList.add('hidden');
+        }
+
+        function selectSlashItem(type) {
+            const blockId = state.slashMenu.blockId;
+            // Clear the "/" text from the block
+            const el = document.querySelector(`[data-block-id="${blockId}"] [contenteditable]`);
+            if (el) { el.innerHTML = ''; el.classList.add('empty'); }
+            changeBlockType(blockId, type);
+            hideSlashMenu();
+        }
+
+        function navigateSlash(dir) {
+            const items = BLOCK_TYPES.filter(b => !state.slashMenu.filter || b.label.toLowerCase().includes(state.slashMenu.filter));
+            if (items.length === 0) return;
+            state.slashMenu.index = (state.slashMenu.index + dir + items.length) % items.length;
+            // Update active class
+            slashEl.querySelectorAll('.slash-item').forEach((el, i) => {
+                el.classList.toggle('active', i === state.slashMenu.index);
+            });
+        }
+
+        // ==========================================
+        // FORMAT TOOLBAR
+        // ==========================================
+        const fmtEl = document.getElementById('formatToolbar');
+
+        function showFormatToolbar() {
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) { hideFormatToolbar(); return; }
+            const range = sel.getRangeAt(0);
+            // Make sure selection is inside a block-content
+            const container = range.commonAncestorContainer;
+            if (!container || (!container.parentElement?.closest('#blocksContainer') && !container.parentElement?.closest('#pageTitle'))) {
+                hideFormatToolbar(); return;
+            }
+            const rect = range.getBoundingClientRect();
+            if (rect.width === 0) { hideFormatToolbar(); return; }
+            state.fmtVisible = true;
+            fmtEl.innerHTML = `<div class="flex items-center gap-0.5 rounded-lg shadow-xl border px-1 py-1" style="background:var(--bg-secondary);border-color:var(--border)">
+    ${FORMAT_OPTS.map(f => `<button class="fmt-btn w-8 h-8 rounded flex items-center justify-center transition-colors" style="color:var(--text-secondary)" data-fmt-cmd="${f.cmd}" aria-label="${f.label}" title="${f.label}"><i class="${f.icon}" style="font-size:12px"></i></button>`).join('')}
+    <div style="width:1px;height:16px;background:var(--border);margin:0 2px"></div>
+    <button class="fmt-btn w-8 h-8 rounded flex items-center justify-center transition-colors" style="color:var(--text-secondary)" data-fmt-cmd="strikeThrough" aria-label="Strikethrough" title="Strikethrough"><i class="fa-solid fa-strikethrough" style="font-size:12px"></i></button>
+  </div>`;
+            fmtEl.classList.remove('hidden');
+            let top = rect.top - 44;
+            let left = rect.left + rect.width / 2 - 80;
+            if (top < 8) top = rect.bottom + 8;
+            if (left < 8) left = 8;
+            if (left + 160 > window.innerWidth) left = window.innerWidth - 168;
+            fmtEl.style.top = top + 'px';
+            fmtEl.style.left = left + 'px';
+        }
+
+        function hideFormatToolbar() {
+            state.fmtVisible = false;
+            fmtEl.classList.add('hidden');
+        }
+
+        function execFormat(cmd) {
+            document.execCommand(cmd, false, null);
+        }
+
+        // ==========================================
+        // MODAL
+        // ==========================================
+        function showDeleteModal(pageId) {
+            state.deleteTargetId = pageId;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('confirmDeleteBtn').focus();
+        }
+
+        function hideDeleteModal() {
+            state.deleteTargetId = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // ==========================================
+        // PAGES
+        // ==========================================
+        function createPage() {
+            const page = {
+                id: U.uuid(),
+                title: '',
+                blocks: [{ id: U.uuid(), type: 'paragraph', content: '', order: 0 }],
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            };
+            state.pages.unshift(page);
+            state.activePageId = page.id;
+            Storage.save();
+            renderPageList();
+            renderEditor();
+            // Try to sync the new page
+            if (API.configured()) {
+                API.savePage(page).catch(() => { });
+            }
+        }
+
+        function removePage(id) {
+            const idx = state.pages.findIndex(p => p.id === id);
+            if (idx === -1) return;
+            state.pages.splice(idx, 1);
+            if (state.activePageId === id) {
+                state.activePageId = state.pages.length > 0 ? state.pages[Math.min(idx, state.pages.length - 1)].id : null;
+            }
+            Storage.save();
+            renderPageList();
+            renderEditor();
+            if (API.configured()) API.deletePage(id).catch(() => { });
+        }
+
+        function setActivePage(id) {
+            if (state.activePageId === id) return;
+            state.activePageId = id;
+            Storage.save();
+            renderPageList();
+            renderEditor();
+        }
+
+        function movePage(id, dir) {
+            const idx = state.pages.findIndex(p => p.id === id);
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= state.pages.length) return;
+            [state.pages[idx], state.pages[newIdx]] = [state.pages[newIdx], state.pages[idx]];
+            Storage.save();
+            renderPageList();
+        }
+
+        // ==========================================
+        // EXPORT
+        // ==========================================
+        function exportMarkdown() {
+            const page = getActivePage();
+            if (!page) { Toast.show('No page selected', 'error'); return; }
+            let md = '';
+            let numCounter = 0;
+            page.blocks.forEach(block => {
+                const text = U.htmlToMd(block.content);
+                switch (block.type) {
+                    case 'h1': md += `# ${text}\n\n`; break;
+                    case 'h2': md += `## ${text}\n\n`; break;
+                    case 'h3': md += `### ${text}\n\n`; break;
+                    case 'bullet': md += `- ${text}\n`; break;
+                    case 'numbered': numCounter++; md += `${numCounter}. ${text}\n`; break;
+                    case 'divider': md += `---\n\n`; numCounter = 0; break;
+                    default: md += `${text}\n\n`; numCounter = 0;
+                }
+                if (block.type !== 'numbered') numCounter = 0;
+            });
+            // Download
+            const blob = new Blob([md.trim() + '\n'], { type: 'text/markdown' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${page.title || 'untitled'}.md`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            Toast.show('Exported as Markdown', 'success');
+        }
+
+        // ==========================================
+        // WELCOME PAGE
+        // ==========================================
+        function createWelcomePage() {
+            const now = Date.now();
+            return {
+                id: U.uuid(),
+                title: 'Welcome to NotionLite',
+                blocks: [
+                    { id: U.uuid(), type: 'h1', content: 'Welcome to NotionLite', order: 0 },
+                    { id: U.uuid(), type: 'paragraph', content: 'A minimal block-based editor with Google Sheets sync. Everything runs in a single HTML file.', order: 1 },
+                    { id: U.uuid(), type: 'h2', content: 'Getting Started', order: 2 },
+                    { id: U.uuid(), type: 'bullet', content: 'Type <b>/</b> at the start of an empty block to change its type', order: 3 },
+                    { id: U.uuid(), type: 'bullet', content: 'Select text to reveal the formatting toolbar', order: 4 },
+                    { id: U.uuid(), type: 'bullet', content: 'Press <b>Enter</b> to create a new block below', order: 5 },
+                    { id: U.uuid(), type: 'bullet', content: 'Press <b>Backspace</b> on an empty block to remove it', order: 6 },
+                    { id: U.uuid(), type: 'divider', content: '', order: 7 },
+                    { id: U.uuid(), type: 'h2', content: 'Keyboard Shortcuts', order: 8 },
+                    { id: U.uuid(), type: 'bullet', content: '<b>Ctrl / Cmd + S</b> — Force save and sync', order: 9 },
+                    { id: U.uuid(), type: 'bullet', content: '<b>Ctrl / Cmd + K</b> — Focus search', order: 10 },
+                    { id: U.uuid(), type: 'bullet', content: '<b>Ctrl / Cmd + Shift + E</b> — Export page as Markdown', order: 11 },
+                    { id: U.uuid(), type: 'divider', content: '', order: 12 },
+                    { id: U.uuid(), type: 'h2', content: 'Google Sheets Sync', order: 13 },
+                    { id: U.uuid(), type: 'paragraph', content: 'To enable cloud sync, deploy the included Google Apps Script as a Web App and paste the URL into the <b>CONFIG.APPS_SCRIPT_URL</b> variable at the top of this file\'s script section. All data is saved locally regardless.', order: 14 },
+                ],
+                createdAt: now,
+                updatedAt: now,
+            };
+        }
+
+        // ==========================================
+        // EVENTS
+        // ==========================================
+        function initEvents() {
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', Theme.toggle);
+
+            // Mobile sidebar
+            document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
+            overlayEl.addEventListener('click', closeSidebar);
+
+            // New page
+            document.getElementById('newPageBtn').addEventListener('click', () => { createPage(); closeSidebar(); });
+
+            // Export
+            document.getElementById('exportBtn').addEventListener('click', exportMarkdown);
+
+            // Search
+            const searchInput = document.getElementById('searchInput');
+            const debouncedSearch = U.debounce(q => { state.searchQuery = q; renderPageList(); }, CONFIG.SEARCH_DEBOUNCE_MS);
+            searchInput.addEventListener('input', e => debouncedSearch(e.target.value));
+            searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { e.target.value = ''; state.searchQuery = ''; renderPageList(); e.target.blur(); } });
+
+            // Page list (event delegation)
+            document.getElementById('pageList').addEventListener('click', e => {
+                const item = e.target.closest('[data-page-id]');
+                if (!item) return;
+                const id = item.dataset.pageId;
+                if (e.target.closest('.pg-del')) { showDeleteModal(id); return; }
+                if (e.target.closest('.pg-move-up')) { movePage(id, -1); return; }
+                if (e.target.closest('.pg-move-down')) { movePage(id, 1); return; }
+                setActivePage(id);
+                closeSidebar();
+            });
+            document.getElementById('pageList').addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    const item = e.target.closest('[data-page-id]');
+                    if (item) { setActivePage(item.dataset.pageId); closeSidebar(); }
+                }
+            });
+
+            // Delete modal
+            document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+                if (state.deleteTargetId) removePage(state.deleteTargetId);
+                hideDeleteModal();
+            });
+            document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
+            document.getElementById('deleteModalBg').addEventListener('click', hideDeleteModal);
+
+            // Editor content delegation
+            editorEl.addEventListener('input', e => {
+                // Title input
+                if (e.target.id === 'pageTitle') {
+                    const val = e.target.innerHTML;
+                    e.target.classList.toggle('empty', !e.target.textContent.trim());
+                    updateTitleInState(val);
+                    return;
+                }
+                // Block input
+                const bw = e.target.closest('[data-block-id]');
+                if (!bw || !e.target.hasAttribute('contenteditable')) return;
+                const blockId = bw.dataset.blockId;
+                const blockType = bw.dataset.bt;
+                // Update empty state
+                e.target.classList.toggle('empty', !e.target.textContent.trim());
+                // Slash command detection
+                if (blockType !== 'divider') {
+                    const text = e.target.textContent;
+                    if (text.startsWith('/')) {
+                        showSlashMenu(blockId, text.slice(1).toLowerCase().trim());
+                    } else {
+                        hideSlashMenu();
+                    }
+                }
+                updateBlockInState(blockId, e.target.innerHTML);
+            });
+
+            // Block keydown
+            editorEl.addEventListener('keydown', e => {
+                // Slash menu navigation
+                if (state.slashMenu.visible) {
+                    if (e.key === 'ArrowDown') { e.preventDefault(); navigateSlash(1); return; }
+                    if (e.key === 'ArrowUp') { e.preventDefault(); navigateSlash(-1); return; }
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const items = BLOCK_TYPES.filter(b => !state.slashMenu.filter || b.label.toLowerCase().includes(state.slashMenu.filter));
+                        if (items[state.slashMenu.index]) selectSlashItem(items[state.slashMenu.index].type);
+                        return;
+                    }
+                    if (e.key === 'Escape') { e.preventDefault(); hideSlashMenu(); return; }
+                }
+
+                // Title keydown
+                if (e.target.id === 'pageTitle') {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const page = getActivePage();
+                        if (page && page.blocks.length > 0) {
+                            focusBlock(page.blocks[0].id, 'start');
+                        }
+                    }
+                    return;
+                }
+
+                // Block keydown
+                const bw = e.target.closest('[data-block-id]');
+                if (!bw || !e.target.hasAttribute('contenteditable')) return;
+                const blockId = bw.dataset.blockId;
+                const blockType = bw.dataset.bt;
+
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const page = getActivePage();
+                    if (!page) return;
+                    const block = page.blocks.find(b => b.id === blockId);
+                    if (!block) return;
+                    // Empty list item → convert to paragraph
+                    if ((blockType === 'bullet' || blockType === 'numbered') && !U.plainText(block.content).trim()) {
+                        changeBlockType(blockId, 'paragraph');
+                        return;
+                    }
+                    // Determine new block type
+                    let newType = 'paragraph';
+                    if (blockType === 'bullet' || blockType === 'numbered') newType = blockType;
+                    // Split content at cursor
+                    const afterContent = splitBlockAtCursor(blockId);
+                    updateBlockInState(blockId, e.target.innerHTML);
+                    createBlock(blockId, newType, afterContent);
+                }
+
+                if (e.key === 'Backspace') {
+                    const page = getActivePage();
+                    if (!page) return;
+                    const block = page.blocks.find(b => b.id === blockId);
+                    if (!block) return;
+                    // Empty block → delete
+                    if (!U.plainText(block.content).trim()) {
+                        e.preventDefault();
+                        deleteBlock(blockId);
+                        return;
+                    }
+                    // Cursor at start → merge with previous (simplified: just let browser handle, or convert type)
+                    // For list items at start, convert to paragraph
+                    const sel = window.getSelection();
+                    if (sel.rangeCount) {
+                        const range = sel.getRangeAt(0);
+                        if (range.collapsed && isAtStartOfContent(e.target, range)) {
+                            if (blockType === 'bullet' || blockType === 'numbered') {
+                                e.preventDefault();
+                                changeBlockType(blockId, 'paragraph');
+                            }
+                        }
+                    }
+                }
+
+                if (e.key === 'ArrowUp') {
+                    const sel = window.getSelection();
+                    if (sel.rangeCount && isAtStartOfContent(e.target, sel.getRangeAt(0))) {
+                        e.preventDefault();
+                        const page = getActivePage();
+                        if (!page) return;
+                        const idx = page.blocks.findIndex(b => b.id === blockId);
+                        if (idx > 0) focusBlock(page.blocks[idx - 1].id, 'end');
+                    }
+                }
+
+                if (e.key === 'ArrowDown') {
+                    const sel = window.getSelection();
+                    if (sel.rangeCount && isAtEndOfContent(e.target, sel.getRangeAt(0))) {
+                        e.preventDefault();
+                        const page = getActivePage();
+                        if (!page) return;
+                        const idx = page.blocks.findIndex(b => b.id === blockId);
+                        if (idx < page.blocks.length - 1) focusBlock(page.blocks[idx + 1].id, 'start');
+                    }
+                }
+            });
+
+            // Divider delete buttons
+            editorEl.addEventListener('click', e => {
+                const del = e.target.closest('[data-divider-del]');
+                if (del) { deleteBlock(del.dataset.dividerDel); }
+            });
+
+            // Slash menu click
+            slashEl.addEventListener('click', e => {
+                const item = e.target.closest('[data-slash-type]');
+                if (item) selectSlashItem(item.dataset.slashType);
+            });
+
+            // Format toolbar click
+            fmtEl.addEventListener('click', e => {
+                const btn = e.target.closest('[data-fmt-cmd]');
+                if (btn) { execFormat(btn.dataset.fmtCmd); }
+            });
+
+            // Format toolbar hover
+            fmtEl.addEventListener('mouseover', e => {
+                const btn = e.target.closest('.fmt-btn');
+                if (btn) btn.style.background = 'var(--bg-tertiary)';
+            });
+            fmtEl.addEventListener('mouseout', e => {
+                const btn = e.target.closest('.fmt-btn');
+                if (btn) btn.style.background = 'transparent';
+            });
+
+            // Selection change for format toolbar
+            document.addEventListener('selectionchange', () => {
+                if (state.slashMenu.visible) return;
+                requestAnimationFrame(() => {
+                    const sel = window.getSelection();
+                    if (sel.isCollapsed) { hideFormatToolbar(); return; }
+                    // Only show if selection is inside editor
+                    if (!sel.anchorNode || !editorEl.contains(sel.anchorNode)) { hideFormatToolbar(); return; }
+                    showFormatToolbar();
+                });
+            });
+
+            // Hide slash menu / format toolbar on outside click
+            document.addEventListener('mousedown', e => {
+                if (!slashEl.contains(e.target) && !e.target.closest('[contenteditable]')) hideSlashMenu();
+                if (!fmtEl.contains(e.target) && !e.target.closest('[contenteditable]')) hideFormatToolbar();
+            });
+
+            // Global keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                const mod = e.ctrlKey || e.metaKey;
+                if (mod && e.key === 's') {
+                    e.preventDefault();
+                    forceSync();
+                }
+                if (mod && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                    if (window.innerWidth < 768) openSidebar();
+                }
+                if (mod && e.shiftKey && (e.key === 'e' || e.key === 'E')) {
+                    e.preventDefault();
+                    exportMarkdown();
+                }
+                if (e.key === 'Escape') {
+                    hideSlashMenu();
+                    hideFormatToolbar();
+                    hideDeleteModal();
+                }
+            });
+
+            // Close sidebar on resize to desktop
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) closeSidebar();
+            });
+        }
+
+        function isAtStartOfContent(el, range) {
+            try {
+                const pre = document.createRange();
+                pre.selectNodeContents(el);
+                pre.setEnd(range.startContainer, range.startOffset);
+                return pre.toString().length === 0;
+            } catch { return false; }
+        }
+
+        function isAtEndOfContent(el, range) {
+            try {
+                const post = document.createRange();
+                post.selectNodeContents(el);
+                post.setStart(range.endContainer, range.endOffset);
+                return post.toString().length === 0;
+            } catch { return false; }
+        }
+
+        // ==========================================
+        // INIT
+        // ==========================================
+        async function init() {
+            Theme.init();
+            initDebouncedSave();
+            initEvents();
+
+            // Load data: try backend first, fall back to localStorage
+            await loadFromBackend();
+
+            const saved = Storage.load();
+            if (saved && saved.pages && saved.pages.length > 0) {
+                state.pages = saved.pages;
+                state.activePageId = saved.activePageId || saved.pages[0].id;
+            } else {
+                // First visit — create welcome page
+                const welcome = createWelcomePage();
+                state.pages = [welcome];
+                state.activePageId = welcome.id;
+                Storage.save();
+            }
+
+            renderPageList();
+            renderEditor();
+            setSyncStatus('saved');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
