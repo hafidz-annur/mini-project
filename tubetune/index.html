@@ -11,7 +11,6 @@
     <link rel="icon" href="favicon.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="manifest" crossorigin="use-credentials" href="manifest.json">
     <script>
         tailwind.config = {
             theme: { extend: { fontFamily: { display: ['Outfit', 'sans-serif'], body: ['"DM Sans"', 'sans-serif'] } } }
@@ -49,7 +48,6 @@
         .v-warning { color: var(--warning); }
         .v-info { color: #5dade2; }
         .v-bg { background: var(--bg-base); }
-        .v-surface { background: var(--bg-surface); }
         .v-elevated { background: var(--bg-elevated); }
         .v-hover { background: var(--bg-hover); }
         .v-accent-dim { background: var(--accent-dim); }
@@ -191,7 +189,6 @@
     <div class="bg-blob bg-blob-1"></div>
     <div class="bg-blob bg-blob-2"></div>
 
-    <!-- Hidden native audio element — ini yang dipakai untuk play -->
     <audio id="audio-player" preload="none"></audio>
 
     <div id="app" class="flex flex-col h-dynamic-screen relative z-10">
@@ -263,7 +260,7 @@
             </div>
             <div class="flex items-center h-full px-4 pt-2 pb-1 gap-4" style="min-height: 88px;">
                 <div class="flex items-center gap-3 w-1/4 min-w-0">
-                    <img id="player-thumb" class="player-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324282f' width='56' height='56' rx='8'/%3E%3C/svg%3E" alt="Sedang diputar">
+                    <img id="player-thumb" class="player-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324282f' width='56' height='56' rx='8'/%3E%3C/svg%3E" alt="">
                     <div class="min-w-0">
                         <p id="player-title" class="text-sm font-semibold truncate">Tidak ada lagu</p>
                         <p id="player-artist" class="text-xs truncate v-text2">—</p>
@@ -293,7 +290,6 @@
         </footer>
     </div>
 
-    <!-- Modal Tambah Lagu -->
     <div id="modal-add-track" class="modal-overlay">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
@@ -302,7 +298,7 @@
             </div>
             <div class="space-y-4">
                 <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">URL YouTube</label><input id="input-url" type="url" placeholder="https://youtube.com/watch?v=..." class="input-field" autocomplete="off"></div>
-                <div id="url-preview" class="hidden rounded-xl overflow-hidden v-err-border"><div class="flex items-center gap-3 p-3"><img id="preview-thumb" class="preview-thumb" src="" alt="Pratinjau"><div class="flex-1 min-w-0"><p id="preview-status" class="text-xs v-muted">Mengambil info...</p></div></div></div>
+                <div id="url-preview" class="hidden rounded-xl overflow-hidden v-err-border"><div class="flex items-center gap-3 p-3"><img id="preview-thumb" class="preview-thumb" src="" alt=""><div class="flex-1 min-w-0"><p id="preview-status" class="text-xs v-muted">Mengambil info...</p></div></div></div>
                 <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Judul</label><input id="input-title" type="text" placeholder="Judul lagu" class="input-field" autocomplete="off"></div>
                 <div><label class="text-xs font-semibold uppercase tracking-wider block mb-2 v-text2">Artis</label><input id="input-artist" type="text" placeholder="Nama artis" class="input-field" autocomplete="off"></div>
                 <div id="modal-error-add" class="hidden text-sm rounded-lg p-3 v-err"></div>
@@ -311,7 +307,6 @@
         </div>
     </div>
 
-    <!-- Modal Buat Playlist -->
     <div id="modal-create-pl" class="modal-overlay">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
@@ -326,7 +321,6 @@
         </div>
     </div>
 
-    <!-- Modal Pindah Lagu -->
     <div id="modal-move-track" class="modal-overlay">
         <div class="modal-box">
             <div class="flex items-center justify-between mb-6">
@@ -347,20 +341,42 @@
             var CONFIG = {
                 APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwBW2cFXVH28-Kcqc__ZSikE3FaG0wTQ1im3rjq1cFr7ABiOFwG-1tX9l72QfPr3Cq1/exec',
                 SEARCH_DEBOUNCE_MS: 250,
-                TOAST_DURATION_MS: 4000
+                TOAST_DURATION_MS: 4000,
+                PROVIDER_TIMEOUT_MS: 8000
             };
 
             /* ═══════════════════════════════════════
-               Piped API instances (fallback chain)
-               Digunakan untuk ambil stream audio langsung
-               dari YouTube tanpa iframe.
+               MULTI-PROVIDER STREAM SOURCES
+               ─────────────────────────────────
+               Urutkan dari yang paling reliable.
+               Sistem akan coba satu per satu sampai
+               dapat stream yang bisa diputar.
+               Instance yang berhasil di-cache di
+               localStorage supaya next time langsung
+               diprioritaskan.
             ═══════════════════════════════════════ */
-            var PIPED_INSTANCES = [
-                'https://pipedapi.kavin.rocks',
-                'https://pipedapi.adminforge.de',
-                'https://pipedapi.r4fo.com'
+            var STREAM_PROVIDERS = [
+                // ── Piped ──
+                { type: 'piped', base: 'https://pipedapi.kavin.rocks' },
+                { type: 'piped', base: 'https://pipedapi.adminforge.de' },
+                { type: 'piped', base: 'https://pipedapi.r4fo.com' },
+                { type: 'piped', base: 'https://pipedapi.in.projectsegfau.lt' },
+                { type: 'piped', base: 'https://pipedapi.moomoo.me' },
+                { type: 'piped', base: 'https://pipedapi.leptons.xyz' },
+
+                // ── Invidious ──
+                { type: 'invidious', base: 'https://inv.nadeko.net' },
+                { type: 'invidious', base: 'https://invidious.nerdvpn.de' },
+                { type: 'invidious', base: 'https://iv.ggtyler.dev' },
+                { type: 'invidious', base: 'https://invidious.privacyredirect.com' },
+                { type: 'invidious', base: 'https://vid.puffyan.us' },
+                { type: 'invidious', base: 'https://invidious.protokolla.fi' }
             ];
-            var pipedIndex = 0;
+
+            // Instance yang sedang di-skip karena error (cooldown 5 menit)
+            var failedProviders = {};
+            // Instance terakhir yang berhasil (diprioritaskan)
+            var lastWorkingProvider = null;
 
             var state = {
                 tracks: [], filteredTracks: [], playlists: [],
@@ -373,22 +389,23 @@
 
             var progressAnimId = null;
 
-            /* ═══════════════════════════════════════
-               Storage
-            ═══════════════════════════════════════ */
             var Storage = {
                 get: function (k, f) { try { var v = localStorage.getItem('tt_' + k); return v !== null ? JSON.parse(v) : f; } catch (e) { return f; } },
                 set: function (k, v) { try { localStorage.setItem('tt_' + k, JSON.stringify(v)); } catch (e) { } },
                 remove: function (k) { try { localStorage.removeItem('tt_' + k); } catch (e) { } }
             };
 
-            /* ═══════════════════════════════════════
-               Utils
-            ═══════════════════════════════════════ */
             var Utils = {
                 formatTime: function (s) { if (!s || !isFinite(s) || s < 0) return '0:00'; return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); },
                 debounce: function (fn, ms) { var t; return function () { var a = arguments, self = this; clearTimeout(t); t = setTimeout(function () { fn.apply(self, a); }, ms); }; },
-                extractVideoId: function (u) { if (!u) return null; var m = u.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if (m) return m[1]; m = u.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if (m) return m[1]; m = u.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/); if (m) return m[1]; if (/^[a-zA-Z0-9_-]{11}$/.test(u.trim())) return u.trim(); return null; },
+                extractVideoId: function (u) {
+                    if (!u) return null;
+                    var m = u.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if (m) return m[1];
+                    m = u.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/); if (m) return m[1];
+                    m = u.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/); if (m) return m[1];
+                    if (/^[a-zA-Z0-9_-]{11}$/.test(u.trim())) return u.trim();
+                    return null;
+                },
                 shuffleArray: function (a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = b[i]; b[i] = b[j]; b[j] = tmp; } return b; },
                 highlightText: function (t, q) { if (!q) return t; return t.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>'); }
             };
@@ -411,27 +428,24 @@
                 setTimeout(function () { el.classList.add('toast-exit'); el.addEventListener('animationend', function () { el.remove(); }); }, CONFIG.TOAST_DURATION_MS);
             }
 
-            /* ═══════════════════════════════════════
-               Auth Guard
-            ═══════════════════════════════════════ */
-            function checkAuth() { var t = getToken(); if (!t) { window.location.replace('login.html'); return false; } return true; }
+            function checkAuth() { if (!getToken()) { window.location.replace('login.html'); return false; } return true; }
             function forceLogout(msg) { Storage.remove('token'); Storage.remove('username'); if (msg) toast(msg, 'warning'); setTimeout(function () { window.location.replace('login.html'); }, 800); }
 
             /* ═══════════════════════════════════════
-               API (Google Sheets backend)
+               Google Sheets API
             ═══════════════════════════════════════ */
             var Api = {
                 fetchTracks: function () {
                     var token = getToken(); if (!token) throw new Error('NO_AUTH');
                     return fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getTracks', token: token }) })
                         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                        .then(function (data) { if (data.error === 'Unauthorized' || data.error === 'Token tidak valid') throw new Error('NO_AUTH'); if (data.error) throw new Error(data.error); return data; });
+                        .then(function (d) { if (d.error === 'Unauthorized' || d.error === 'Token tidak valid') throw new Error('NO_AUTH'); if (d.error) throw new Error(d.error); return d; });
                 },
                 post: function (data) {
                     var token = getToken(); if (token) data.token = token;
                     return fetch(CONFIG.APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) })
                         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                        .then(function (result) { if (result.error === 'Unauthorized' || result.error === 'Token tidak valid') { forceLogout('Sesi berakhir, silakan masuk lagi'); throw new Error('NO_AUTH'); } if (result.error) throw new Error(result.error); return result; });
+                        .then(function (r) { if (r.error === 'Unauthorized' || r.error === 'Token tidak valid') { forceLogout('Sesi berakhir'); throw new Error('NO_AUTH'); } if (r.error) throw new Error(r.error); return r; });
                 },
                 fetchOEmbed: function (id) {
                     return fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + id + '&format=json')
@@ -440,18 +454,170 @@
             };
 
             /* ═══════════════════════════════════════
-               Audio Player (native <audio> + Piped API)
-               Menggantikan YouTube IFrame API.
-               - Background play: YES
-               - Lock screen controls: YES (Media Session)
-               - Screen sleep: YES
+               STREAM ENGINE — Multi-Provider
+               Mencoba semua provider secara berurutan
+               sampai mendapat stream audio yang valid.
+            ═══════════════════════════════════════ */
+
+            var StreamEngine = {
+
+                /** Fetch dari satu provider, return normalized stream object */
+                fetchFrom: function (provider, videoId) {
+                    var timeout = new Promise(function (_, reject) {
+                        setTimeout(function () { reject(new Error('timeout')); }, CONFIG.PROVIDER_TIMEOUT_MS);
+                    });
+
+                    var fetchPromise;
+                    if (provider.type === 'piped') {
+                        fetchPromise = StreamEngine.fetchPiped(provider.base, videoId);
+                    } else {
+                        fetchPromise = StreamEngine.fetchInvidious(provider.base, videoId);
+                    }
+
+                    return Promise.race([fetchPromise, timeout]).then(function (result) {
+                        result._provider = provider.base;
+                        result._type = provider.type;
+                        return result;
+                    });
+                },
+
+                /** Piped API parser */
+                fetchPiped: function (base, videoId) {
+                    return fetch(base + '/streams/' + videoId)
+                        .then(function (r) {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        })
+                        .then(function (data) {
+                            if (!data.audioStreams || !data.audioStreams.length) throw new Error('No streams');
+                            var sorted = data.audioStreams
+                                .filter(function (s) { return s.mimeType && s.mimeType.indexOf('audio') === 0; })
+                                .sort(function (a, b) { return (b.bitrate || 0) - (a.bitrate || 0); });
+                            if (!sorted.length) throw new Error('No audio format');
+                            return {
+                                url: sorted[0].url,
+                                duration: data.duration || 0,
+                                title: data.title || '',
+                                artist: data.uploader || '',
+                                thumb: data.thumbnailUrl || ('https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg')
+                            };
+                        });
+                },
+
+                /** Invidious API parser */
+                fetchInvidious: function (base, videoId) {
+                    return fetch(base + '/api/v1/videos/' + videoId)
+                        .then(function (r) {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        })
+                        .then(function (data) {
+                            if (data.error) throw new Error(data.error);
+                            var formats = (data.adaptiveFormats || [])
+                                .filter(function (f) { return f.type && f.type.indexOf('audio/') === 0; })
+                                .sort(function (a, b) { return (b.bitrate || 0) - (a.bitrate || 0); });
+                            if (!formats.length) throw new Error('No audio format');
+
+                            var best = formats[0];
+                            var url = best.url;
+
+                            // Invidious kadang return URL lokal yang perlu di-proxy
+                            if (best.local === true || !url) {
+                                url = base + '/latest_version?id=' + videoId + '&itag=' + best.itag + '&local=true';
+                            }
+
+                            return {
+                                url: url,
+                                duration: data.lengthSeconds || 0,
+                                title: data.title || '',
+                                artist: data.author || '',
+                                thumb: 'https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg'
+                            };
+                        });
+                },
+
+                /** Bangun urutan provider yang akan dicoba */
+                buildPriorityList: function () {
+                    var now = Date.now();
+                    // Bersihkan cooldown yang sudah lewat
+                    Object.keys(failedProviders).forEach(function (key) {
+                        if (failedProviders[key] < now) delete failedProviders[key];
+                    });
+
+                    var available = STREAM_PROVIDERS.filter(function (p) {
+                        return !failedProviders[p.base];
+                    });
+
+                    // Taruh lastWorking di depan
+                    if (lastWorkingProvider) {
+                        var idx = -1;
+                        for (var i = 0; i < available.length; i++) {
+                            if (available[i].base === lastWorkingProvider) { idx = i; break; }
+                        }
+                        if (idx > 0) {
+                            var item = available.splice(idx, 1)[0];
+                            available.unshift(item);
+                        }
+                    }
+
+                    return available;
+                },
+
+                /** Coba semua provider sampai berhasil */
+                fetchAny: function (videoId) {
+                    var providers = StreamEngine.buildPriorityList();
+
+                    if (!providers.length) {
+                        // Semua di cooldown — reset dan coba lagi
+                        failedProviders = {};
+                        providers = STREAM_PROVIDERS.slice();
+                    }
+
+                    var attemptIndex = 0;
+
+                    function tryNext() {
+                        if (attemptIndex >= providers.length) {
+                            return Promise.reject(new Error('Semua server audio sedang gangguan. Coba lagi beberapa saat.'));
+                        }
+
+                        var provider = providers[attemptIndex];
+                        attemptIndex++;
+
+                        return StreamEngine.fetchFrom(provider, videoId)
+                            .catch(function (err) {
+                                // Tandai sebagai gagal, cooldown 5 menit
+                                failedProviders[provider.base] = Date.now() + (5 * 60 * 1000);
+                                console.warn('Provider gagal:', provider.base, err.message);
+                                return tryNext();
+                            });
+                    }
+
+                    return tryNext().then(function (result) {
+                        // Simpan yang berhasil
+                        lastWorkingProvider = result._provider;
+                        Storage.set('lastProvider', result._provider);
+                        return result;
+                    });
+                }
+            };
+
+            // Restore last working provider dari localStorage
+            lastWorkingProvider = Storage.get('lastProvider', null);
+
+            /* ═══════════════════════════════════════
+               AUDIO PLAYER — native <audio> element
+               Background play ✅
+               Lock screen ✅ (Media Session)
+               Screen sleep ✅
             ═══════════════════════════════════════ */
             var Audio = {
                 el: null,
+                retryCount: 0,
+                maxRetries: 2,
 
                 init: function () {
                     Audio.el = document.getElementById('audio-player');
-                    Audio.el.volume = (Storage.get('volume', 80) / 100);
+                    Audio.el.volume = Storage.get('volume', 80) / 100;
                     state.volume = Storage.get('volume', 80);
                     state.isMuted = Storage.get('muted', false);
                     if (state.isMuted) Audio.el.muted = true;
@@ -460,89 +626,46 @@
                     Audio.el.addEventListener('pause', Audio.onPause);
                     Audio.el.addEventListener('ended', Audio.onEnded);
                     Audio.el.addEventListener('error', Audio.onError);
-                    Audio.el.addEventListener('timeupdate', Audio.onTimeUpdate);
                     Audio.el.addEventListener('loadedmetadata', Audio.onMetadata);
 
                     Audio.initMediaSession();
                 },
 
-                /* ── Fetch stream URL dari Piped API ── */
-                fetchStream: function (videoId) {
-                    // Coba instances berurutan
-                    function tryInstance(index) {
-                        if (index >= PIPED_INSTANCES.length) return Promise.reject(new Error('Semua server audio sedang gangguan'));
-                        var base = PIPED_INSTANCES[index];
-                        return fetch(base + '/streams/' + videoId)
-                            .then(function (r) {
-                                if (!r.ok) throw new Error('HTTP ' + r.status);
-                                return r.json();
-                            })
-                            .then(function (data) {
-                                if (!data.audioStreams || !data.audioStreams.length) throw new Error('Tidak ada stream audio');
-                                // Sort by bitrate descending, ambil yang tertinggi
-                                var sorted = data.audioStreams.filter(function (s) {
-                                    return s.mimeType && s.mimeType.indexOf('audio') === 0;
-                                }).sort(function (a, b) { return (b.bitrate || 0) - (a.bitrate || 0); });
-                                if (!sorted.length) throw new Error('Format audio tidak didukung');
-                                pipedIndex = index; // Remember working instance
-                                return {
-                                    url: sorted[0].url,
-                                    duration: data.duration || 0,
-                                    title: data.title || '',
-                                    artist: data.uploader || '',
-                                    thumb: data.thumbnailUrl || ('https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg')
-                                };
-                            })
-                            .catch(function () {
-                                return tryInstance(index + 1);
-                            });
-                    }
-                    return tryInstance(pipedIndex);
-                },
-
-                /* ── Play track ── */
                 play: function (videoId, index) {
                     state.currentTrackIndex = index;
+                    Audio.retryCount = 0;
                     Storage.set('lastVideoId', videoId);
                     UI.updatePlayerBar();
                     UI.renderPlaylist();
-
-                    // Tampilkan loading di tombol play
                     document.getElementById('play-icon').className = 'fa-solid fa-spinner fa-spin';
 
-                    Audio.fetchStream(videoId).then(function (stream) {
+                    StreamEngine.fetchAny(videoId).then(function (stream) {
                         Audio.el.src = stream.url;
                         Audio.el.load();
-                        Audio.el.play().catch(function (e) {
-                            // Autoplay blocked — user perlu interaksi dulu
-                            console.warn('Autoplay blocked:', e);
+                        Audio.el.play().catch(function () {
                             state.isPlaying = false;
                             UI.updatePlayButton();
                             toast('Tap play untuk mulai', 'info');
                         });
 
-                        // Update durasi dari stream (lebih akurat)
                         if (stream.duration > 0) {
                             var track = state.tracks[index];
-                            if (track && (!track.duration || track.duration === 0)) {
-                                track.duration = stream.duration;
-                            }
+                            if (track && (!track.duration || track.duration === 0)) track.duration = stream.duration;
                             UI.renderPlaylist();
                         }
 
                         Audio.updateMediaSession(stream);
                     }).catch(function (err) {
-                        console.error('Stream error:', err);
-                        toast(err.message || 'Gagal memuat audio', 'error');
+                        toast(err.message, 'error');
                         state.isPlaying = false;
                         UI.updatePlayButton();
                         document.getElementById('play-icon').className = 'fa-solid fa-play';
                     });
                 },
 
-                /* ── Audio events ── */
                 onPlay: function () {
                     state.isPlaying = true;
+                    Audio.retryCount = 0;
                     UI.updatePlayButton();
                     UI.startProgressLoop();
                     document.getElementById('player-bar').classList.add('playing');
@@ -568,51 +691,30 @@
                     Audio.next();
                 },
 
-                onError: function (e) {
-                    var msg = 'Error audio';
-                    if (Audio.el.src) {
-                        msg = 'Stream terputus, mencoba lagi...';
-                        // Retry sekali
+                onError: function () {
+                    if (!Audio.el.src) return;
+                    Audio.retryCount++;
+                    if (Audio.retryCount <= Audio.maxRetries) {
                         var track = state.tracks[state.currentTrackIndex];
                         if (track) {
-                            setTimeout(function () { Audio.play(track.videoId, state.currentTrackIndex); }, 1500);
+                            // Reset cooldown supaya coba provider lain
+                            failedProviders = {};
+                            setTimeout(function () { Audio.play(track.videoId, state.currentTrackIndex); }, 1000);
                             return;
                         }
                     }
-                    toast(msg, 'error');
-                },
-
-                onTimeUpdate: function () {
-                    // Dipakai sebagai fallback kalau requestAnimationFrame tidak jalan
-                    // (misalnya tab di background di beberapa browser)
-                    if (!state.isPlaying) return;
-                    var c = Audio.el.currentTime || 0;
-                    var d = Audio.el.duration || 0;
-                    var p = d > 0 ? (c / d) * 100 : 0;
-                    document.getElementById('progress-fill').style.width = p + '%';
-                    document.getElementById('progress-fill-inline').style.width = p + '%';
-                    document.getElementById('time-current').textContent = Utils.formatTime(c);
-                    document.getElementById('time-total').textContent = Utils.formatTime(d);
-
-                    // Update Media Session position
-                    if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession && d > 0) {
-                        try {
-                            navigator.mediaSession.setPositionState({
-                                duration: d,
-                                playbackRate: Audio.el.playbackRate,
-                                position: Math.min(c, d)
-                            });
-                        } catch (e) { /* ignore */ }
-                    }
+                    toast('Stream terputus', 'error');
+                    state.isPlaying = false;
+                    UI.updatePlayButton();
+                    document.getElementById('play-icon').className = 'fa-solid fa-play';
                 },
 
                 onMetadata: function () {
                     document.getElementById('time-total').textContent = Utils.formatTime(Audio.el.duration || 0);
                 },
 
-                /* ── Controls ── */
                 togglePlay: function () {
-                    if (!Audio.el.src || !state.tracks.length || state.currentTrackIndex < 0) return;
+                    if (!Audio.el.src || state.currentTrackIndex < 0) return;
                     if (Audio.el.paused) Audio.el.play().catch(function () {});
                     else Audio.el.pause();
                 },
@@ -645,10 +747,7 @@
                     return state.shuffleOrder.shift();
                 },
 
-                seekTo: function (fraction) {
-                    var d = Audio.el.duration || 0;
-                    if (d > 0) Audio.el.currentTime = fraction * d;
-                },
+                seekTo: function (f) { var d = Audio.el.duration || 0; if (d > 0) Audio.el.currentTime = f * d; },
 
                 setVolume: function (v) {
                     state.volume = Math.max(0, Math.min(100, v));
@@ -667,23 +766,14 @@
                     UI.updateVolumeUI();
                 },
 
-                /* ═══════════════════════════════════════
-                   Media Session API
-                   Menampilkan kontrol di lock screen &
-                   notification bar mobile.
-                   Play/pause/next/prev tetap bisa
-                   saat browser di background!
-                ═══════════════════════════════════════ */
+                /* ── Media Session: lock screen + notif bar ── */
                 initMediaSession: function () {
                     if (!('mediaSession' in navigator)) return;
-
                     navigator.mediaSession.setActionHandler('play', function () { Audio.el.play().catch(function () {}); });
                     navigator.mediaSession.setActionHandler('pause', function () { Audio.el.pause(); });
                     navigator.mediaSession.setActionHandler('previoustrack', function () { Audio.prev(); });
                     navigator.mediaSession.setActionHandler('nexttrack', function () { Audio.next(); });
-                    navigator.mediaSession.setActionHandler('seekto', function (details) {
-                        if (details.seekTime !== undefined) Audio.el.currentTime = details.seekTime;
-                    });
+                    navigator.mediaSession.setActionHandler('seekto', function (d) { if (d.seekTime !== undefined) Audio.el.currentTime = d.seekTime; });
                     navigator.mediaSession.setActionHandler('stop', function () { Audio.el.pause(); Audio.el.currentTime = 0; });
                 },
 
@@ -692,7 +782,8 @@
                     var track = state.tracks[state.currentTrackIndex];
                     var title = (track && track.title) || stream.title || 'Unknown';
                     var artist = (track && track.artist) || stream.artist || 'Unknown';
-                    var thumb = (track && track.videoId) ? 'https://img.youtube.com/vi/' + track.videoId + '/mqdefault.jpg' : (stream.thumb || '');
+                    var vid = (track && track.videoId) || '';
+                    var thumb = vid ? 'https://img.youtube.com/vi/' + vid + '/mqdefault.jpg' : (stream.thumb || '');
 
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: title,
@@ -701,14 +792,14 @@
                         artwork: [
                             { src: thumb.replace('mqdefault', 'default'), sizes: '120x90', type: 'image/jpeg' },
                             { src: thumb, sizes: '320x180', type: 'image/jpeg' },
-                            { src: thumb.replace('mqdefault', 'maxresdefault'), sizes: '1280x720', type: 'image/jpeg' }
+                            { src: thumb.replace('mqdefault', 'hqdefault'), sizes: '480x360', type: 'image/jpeg' }
                         ]
                     });
                 }
             };
 
             /* ═══════════════════════════════════════
-               UI Renderer
+               UI
             ═══════════════════════════════════════ */
             var UI = {
                 init: function () { UI.bindEvents(); UI.loadTracks(); },
@@ -746,9 +837,7 @@
                     Api.fetchTracks().then(function (data) {
                         state.tracks = data.tracks || []; state.playlists = data.playlists || [];
                         state.isLoading = false; UI.applyFilter(); UI.renderPlaylistNav();
-                    }).catch(function (e) {
-                        state.isLoading = false; if (e.message === 'NO_AUTH') return; UI.renderError(e.message);
-                    });
+                    }).catch(function (e) { state.isLoading = false; if (e.message === 'NO_AUTH') return; UI.renderError(e.message); });
                 },
 
                 applyFilter: function () {
@@ -793,9 +882,7 @@
                     UI.updatePlayButton();
                 },
 
-                updatePlayButton: function () {
-                    document.getElementById('play-icon').className = state.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-                },
+                updatePlayButton: function () { document.getElementById('play-icon').className = state.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play'; },
 
                 updateVolumeUI: function () {
                     var d = state.isMuted ? 0 : state.volume;
@@ -813,6 +900,9 @@
                             document.getElementById('progress-fill-inline').style.width = p + '%';
                             document.getElementById('time-current').textContent = Utils.formatTime(c);
                             document.getElementById('time-total').textContent = Utils.formatTime(d);
+                            if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession && d > 0) {
+                                try { navigator.mediaSession.setPositionState({ duration: d, playbackRate: Audio.el.playbackRate, position: Math.min(c, d) }); } catch (e) { }
+                            }
                         }
                         progressAnimId = requestAnimationFrame(tick);
                     }
@@ -830,8 +920,8 @@
             document.addEventListener('click', function (e) {
                 var target = e.target.closest('[data-action]');
                 if (!target) return;
-                var action = target.dataset.action;
-                switch (action) {
+                var a = target.dataset.action;
+                switch (a) {
                     case 'switch-pl': e.stopPropagation(); TT.switchPlaylist(target.dataset.playlistId); break;
                     case 'delete-pl': e.stopPropagation(); TT.deletePlaylist(target.dataset.playlistId); break;
                     case 'play-track': TT.playTrack(parseInt(target.dataset.index, 10)); break;
@@ -871,7 +961,7 @@
                 closeSidebar: function () { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); },
                 toggleShuffle: function () { state.shuffle = !state.shuffle; state.shuffleOrder = []; document.getElementById('btn-shuffle').classList.toggle('active', state.shuffle); toast(state.shuffle ? 'Acak Aktif' : 'Acak Mati', 'info'); },
                 toggleRepeat: function () {
-                    var modes = ['off', 'all', 'one'], ci = modes.indexOf(state.repeat); state.repeat = modes[(ci + 1) % 3];
+                    var m = ['off', 'all', 'one'], ci = m.indexOf(state.repeat); state.repeat = m[(ci + 1) % 3];
                     var btn = document.getElementById('btn-repeat'); btn.classList.toggle('active', state.repeat !== 'off');
                     var badge = btn.querySelector('.repeat-badge'); if (badge) badge.remove();
                     if (state.repeat === 'one') { var b = document.createElement('span'); b.className = 'repeat-badge absolute text-[8px] font-bold v-accent'; b.textContent = '1'; btn.appendChild(b); }
@@ -930,5 +1020,4 @@
         document.addEventListener('DOMContentLoaded', TT.init);
     </script>
 </body>
-
 </html>
